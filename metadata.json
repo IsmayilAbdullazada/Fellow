@@ -1,0 +1,6 @@
+{
+  "name": "Fellow - Verified Solo Micro-Meetups",
+  "description": "Low-commitment, verified social micro-meetups for solo travelers and remote workers in Lisbon and Tokyo.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
