@@ -9,6 +9,7 @@ import {
   ChatRoom,
   CityCode,
   SafetyReport,
+  SafetyReportType,
   WaitlistRegion,
 } from '../types';
 import {
@@ -27,6 +28,7 @@ interface FellowContextType {
   currentUser: User;
   allUsers: User[];
   setCurrentUserById: (userId: string) => void;
+  switchPersona: (userId: string) => void;
   updateCurrentUserProfile: (fields: Partial<User>) => void;
 
   // City & Waitlist
@@ -43,6 +45,7 @@ interface FellowContextType {
   tripDaysRemaining: number | null;
   isTripActive: boolean;
   updateUserTrip: (cityCode: CityCode, arrivalDate: string, departureDate: string) => void;
+  updateCurrentUserTripDates: (arrivalDate: string, departureDate: string) => void;
 
   // Plans
   plans: MicroPlan[];
@@ -73,11 +76,24 @@ interface FellowContextType {
   safetyReports: SafetyReport[];
   mutedUserIds: string[];
   reportUser: (reportedUserId: string, planId: string | null, reason: SafetyReport['reason'], details: string) => void;
+  submitSafetyReport: (params: {
+    reported_user_id: string;
+    plan_id?: string | null;
+    report_type: SafetyReportType;
+    details: string;
+  }) => void;
   signCodeOfConduct: () => void;
 
   // Modals & Navigation state
-  activeTab: 'discover' | 'my_plans' | 'host' | 'profile';
-  setActiveTab: (tab: 'discover' | 'my_plans' | 'host' | 'profile') => void;
+  isAuthenticated: boolean;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  login: (userId?: string) => void;
+  logout: () => void;
+  pendingAction: { type: 'join_plan' | 'host_plan' | 'view_chat' | 'profile'; planId?: string } | null;
+  setPendingAction: (action: { type: 'join_plan' | 'host_plan' | 'view_chat' | 'profile'; planId?: string } | null) => void;
+  activeTab: 'landing' | 'discover' | 'my_plans' | 'profile';
+  setActiveTab: (tab: 'landing' | 'discover' | 'my_plans' | 'profile') => void;
   selectedPlanId: string | null;
   setSelectedPlanId: (id: string | null) => void;
   activeChatPlanId: string | null;
@@ -151,7 +167,20 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   });
 
   // UI Navigation states
-  const [activeTab, setActiveTab] = useState<'discover' | 'my_plans' | 'host' | 'profile'>('discover');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const session = localStorage.getItem('fellow_auth_session_v2');
+    return session === 'true';
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'join_plan' | 'host_plan' | 'view_chat' | 'profile';
+    planId?: string;
+  } | null>(null);
+
+  const [activeTab, setActiveTab] = useState<'landing' | 'discover' | 'my_plans' | 'profile'>(() => {
+    const session = localStorage.getItem('fellow_auth_session_v2');
+    return session === 'true' ? 'discover' : 'landing';
+  });
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [activeChatPlanId, setActiveChatPlanId] = useState<string | null>(null);
   const [isHostModalOpen, setIsHostModalOpen] = useState<boolean>(false);
@@ -233,6 +262,10 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
+  const switchPersona = (userId: string) => {
+    setCurrentUserById(userId);
+  };
+
   const updateCurrentUserProfile = (fields: Partial<User>) => {
     setUsers((prev) =>
       prev.map((u) => (u.id === currentUserId ? { ...u, ...fields, updated_at: new Date().toISOString() } : u))
@@ -283,6 +316,30 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   };
 
+  const updateCurrentUserTripDates = (arrivalDate: string, departureDate: string) => {
+    updateUserTrip(activeCityCode, arrivalDate, departureDate);
+  };
+
+  // Auth & Session Handling
+  const login = (userId?: string) => {
+    if (userId) {
+      setCurrentUserId(userId);
+    }
+    setIsAuthenticated(true);
+    localStorage.setItem('fellow_auth_session_v2', 'true');
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.6 },
+    });
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('fellow_auth_session_v2');
+    setActiveTab('landing');
+  };
+
   // Waitlist
   const registerWaitlist = (cityId: string, arrival: string, departure: string, email: string) => {
     setWaitlistCities((prev) =>
@@ -295,10 +352,23 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const signCodeOfConduct = () => {
     updateCurrentUserProfile({ code_of_conduct_signed: true });
     setIsCodeOfConductOpen(false);
+
+    // Chained onboarding: Once charter is signed, advance to KYC verification if needed
+    if (!currentUser.is_verified || !currentUser.has_paid_pass) {
+      setIsVerificationModalOpen(true);
+    }
   };
 
   // Verification & Pass Checkout
   const startVerificationFlow = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (!currentUser.code_of_conduct_signed) {
+      setIsCodeOfConductOpen(true);
+      return;
+    }
     setIsVerificationModalOpen(true);
   };
 
@@ -322,7 +392,21 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const createPlan = (
     planData: Omit<MicroPlan, 'id' | 'host_user_id' | 'status' | 'qr_checkin_token' | 'created_at'>
   ) => {
+    if (!isAuthenticated) {
+      setPendingAction({ type: 'host_plan' });
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Sign-in required to host a micro-meetup.' };
+    }
+
+    if (!currentUser.code_of_conduct_signed) {
+      setPendingAction({ type: 'host_plan' });
+      setIsCodeOfConductOpen(true);
+      return { success: false, error: 'Please review and sign the Platonic Community Charter first.' };
+    }
+
     if (!currentUser.is_verified || !currentUser.has_paid_pass) {
+      setPendingAction({ type: 'host_plan' });
+      setIsVerificationModalOpen(true);
       return { success: false, error: 'Identity verification and $9.99 Verified Pass required to host plans.' };
     }
 
@@ -404,9 +488,22 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Request to Join ($10 hold)
   const requestToJoinPlan = (planId: string) => {
+    if (!isAuthenticated) {
+      setPendingAction({ type: 'join_plan', planId });
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Sign-in required to join a micro-meetup.' };
+    }
+
+    if (!currentUser.code_of_conduct_signed) {
+      setPendingAction({ type: 'join_plan', planId });
+      setIsCodeOfConductOpen(true);
+      return { success: false, error: 'Please review and sign the Platonic Community Charter first.' };
+    }
+
     if (!currentUser.is_verified || !currentUser.has_paid_pass) {
+      setPendingAction({ type: 'join_plan', planId });
       setIsVerificationModalOpen(true);
-      return { success: false, error: 'Verification required to join.' };
+      return { success: false, error: 'Identity verification ($9.99 lifetime pass) required to join.' };
     }
 
     const plan = plans.find((p) => p.id === planId);
@@ -625,12 +722,22 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setReportingTarget(null);
   };
 
+  const submitSafetyReport = (params: {
+    reported_user_id: string;
+    plan_id?: string | null;
+    report_type: SafetyReportType;
+    details: string;
+  }) => {
+    reportUser(params.reported_user_id, params.plan_id || null, params.report_type, params.details);
+  };
+
   return (
     <FellowContext.Provider
       value={{
         currentUser,
         allUsers: users,
         setCurrentUserById,
+        switchPersona,
         updateCurrentUserProfile,
         activeCityCode,
         setActiveCityCode,
@@ -643,6 +750,7 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         tripDaysRemaining,
         isTripActive,
         updateUserTrip,
+        updateCurrentUserTripDates,
         plans,
         participants,
         createPlan,
@@ -663,7 +771,15 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         safetyReports,
         mutedUserIds,
         reportUser,
+        submitSafetyReport,
         signCodeOfConduct,
+        isAuthenticated,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        login,
+        logout,
+        pendingAction,
+        setPendingAction,
         activeTab,
         setActiveTab,
         selectedPlanId,

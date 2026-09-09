@@ -21,6 +21,16 @@ export const CITY_HUBS: Record<string, CityHubInfo> = {
     lng: -9.1393,
     is_live: true,
   },
+  DPS_ID: {
+    code: 'DPS_ID',
+    name: 'Bali (Canggu)',
+    country: 'Indonesia',
+    flag: '🇮🇩',
+    tagline: 'Coastal roasters, rice paddy walks & sunset coconut catchups',
+    lat: -8.6478,
+    lng: 115.1385,
+    is_live: true,
+  },
 };
 
 export const WAITLIST_CITIES: WaitlistRegion[] = [
@@ -134,6 +144,34 @@ export const COMMERCIAL_VENUES: CommercialVenue[] = [
     lng: -9.1467,
     category: 'Nightlife',
     city_code: 'LIS_PT',
+  },
+  // Bali (Canggu)
+  {
+    place_id: 'bali_crate_cafe',
+    name: 'Crate Cafe Canggu',
+    address: 'Jl. Canggu Padang Linjong No.49F, Canggu, Bali 80351',
+    lat: -8.6478,
+    lng: 115.1385,
+    category: 'Food & Drink',
+    city_code: 'DPS_ID',
+  },
+  {
+    place_id: 'bali_the_lawn',
+    name: 'The Lawn Beachside Lounge',
+    address: 'Jl. Pura Dalem, Canggu, Bali 80361',
+    lat: -8.6578,
+    lng: 115.1305,
+    category: 'Food & Drink',
+    city_code: 'DPS_ID',
+  },
+  {
+    place_id: 'bali_black_sand',
+    name: 'Black Sand Brewery & Garden',
+    address: 'Jl. Pantai Batu Bolong No.5, Canggu, Bali 80361',
+    lat: -8.6508,
+    lng: 115.1325,
+    category: 'Nightlife',
+    city_code: 'DPS_ID',
   },
 ];
 
@@ -415,6 +453,48 @@ export const INITIAL_PLANS: MicroPlan[] = [
     qr_checkin_token: 'FELLOW_LIS_TIMEOUT_TOKEN_5519',
     created_at: '2026-09-08T12:00:00Z',
   },
+  // Bali Plan 1: Sunset coconuts at Canggu
+  {
+    id: 'plan_bali_canggu_sunset',
+    host_user_id: 'user_elena_r',
+    city_code: 'DPS_ID',
+    category: 'outdoor_walk',
+    title: 'Echo Beach Sunset Coconuts & Lawn Catchup',
+    description: 'Meeting at The Lawn front deck for fresh young coconuts, sea breeze, and golden hour conversation. Relaxed solo traveler circle, max 4.',
+    venue_name: 'The Lawn Beachside Lounge',
+    venue_address: 'Jl. Pura Dalem, Canggu, Bali 80361',
+    venue_lat: -8.6578,
+    venue_lng: 115.1305,
+    venue_place_id: 'bali_the_lawn',
+    start_time: getFutureTime(4),
+    end_time: getFutureTime(7),
+    max_participants: 4,
+    female_only: false,
+    status: 'open',
+    qr_checkin_token: 'FELLOW_BALI_SUNSET_TOKEN_1029',
+    created_at: '2026-09-08T13:00:00Z',
+  },
+  // Bali Plan 2: Morning breakfast & coffee at Crate
+  {
+    id: 'plan_bali_crate_coffee',
+    host_user_id: 'user_chloe_d',
+    city_code: 'DPS_ID',
+    category: 'cafe_cowork',
+    title: 'Morning Cold Brews & Acai at Crate',
+    description: 'Casual morning breakfast and sharing travel tips before the midday heat. Great gallery vibes and chill acoustics.',
+    venue_name: 'Crate Cafe Canggu',
+    venue_address: 'Jl. Canggu Padang Linjong No.49F, Canggu, Bali 80351',
+    venue_lat: -8.6478,
+    venue_lng: 115.1385,
+    venue_place_id: 'bali_crate_cafe',
+    start_time: getFutureTime(14),
+    end_time: getFutureTime(16),
+    max_participants: 4,
+    female_only: false,
+    status: 'open',
+    qr_checkin_token: 'FELLOW_BALI_CRATE_TOKEN_8821',
+    created_at: '2026-09-08T14:00:00Z',
+  },
 ];
 
 export const INITIAL_PARTICIPANTS = [
@@ -503,6 +583,29 @@ export const INITIAL_PARTICIPANTS = [
     deposit_status: 'released' as const,
     checked_in_at: null,
     created_at: '2026-09-08T12:00:00Z',
+  },
+  // Bali Plans
+  {
+    id: 'part_8',
+    plan_id: 'plan_bali_canggu_sunset',
+    user_id: 'user_elena_r',
+    role: 'host' as const,
+    rsvp_status: 'confirmed' as const,
+    deposit_payment_intent_id: 'pi_host_exempt_006',
+    deposit_status: 'released' as const,
+    checked_in_at: null,
+    created_at: '2026-09-08T13:00:00Z',
+  },
+  {
+    id: 'part_9',
+    plan_id: 'plan_bali_crate_coffee',
+    user_id: 'user_chloe_d',
+    role: 'host' as const,
+    rsvp_status: 'confirmed' as const,
+    deposit_payment_intent_id: 'pi_host_exempt_007',
+    deposit_status: 'released' as const,
+    checked_in_at: null,
+    created_at: '2026-09-08T14:00:00Z',
   },
 ];
 

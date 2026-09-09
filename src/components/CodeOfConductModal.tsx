@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ShieldCheck, AlertCircle, HeartCrack, Lock } from 'lucide-react';
+import { ShieldCheck, Lock, X } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 
 export const CodeOfConductModal: React.FC = () => {
@@ -53,35 +53,47 @@ export const CodeOfConductModal: React.FC = () => {
   if (!isCodeOfConductOpen) return null;
 
   return (
-    <div id="code-of-conduct-modal-overlay" className="fixed inset-0 z-70 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-100 rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl p-6 text-slate-900 text-center relative animate-in fade-in zoom-in-95 duration-150 space-y-4">
-        <div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto border border-indigo-100 shadow-sm">
+    <div
+      id="code-of-conduct-modal-overlay"
+      className="fixed inset-0 z-70 bg-[#1A1918]/60 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div className="bg-white border border-[#EAE7E2] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-[#1A1918] text-center relative animate-in zoom-in-95 duration-150 space-y-4">
+        {/* Close / Bail Button */}
+        <button
+          onClick={() => setIsCodeOfConductOpen(false)}
+          className="absolute top-5 right-5 p-1.5 text-[#9C9892] hover:text-[#1A1918] rounded-full transition-colors"
+          title="Decline and close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="w-14 h-14 rounded-full bg-[#ECFDF5] text-[#059669] flex items-center justify-center mx-auto border border-[#A7F3D0] shadow-2xs">
           <ShieldCheck className="w-7 h-7 stroke-[2.5]" />
         </div>
 
         <div>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">
-            Mandatory Community Charter
+          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#9C9892]">
+            Community Trust Charter
           </span>
-          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
+          <h2 className="font-editorial text-2xl font-semibold text-[#1A1918] mt-1">
             Platonic Non-Dating Policy
           </h2>
         </div>
 
         {/* Unskippable Statement Quote */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4.5 text-xs text-slate-700 leading-relaxed text-left space-y-2">
-          <p className="font-serif italic text-slate-800 text-[13px] leading-normal">
-            &ldquo;Fellow is a platonic community for shared activities. Flirting, romantic advances, unsolicited DMs, or making other travelers uncomfortable results in an immediate, permanent ban with zero refund of your Verification Pass.&rdquo;
+        <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-2xl p-4 text-xs text-[#6B6966] leading-relaxed text-left space-y-2">
+          <p className="font-editorial italic text-[#1A1918] text-sm leading-normal">
+            &ldquo;Fellow is a platonic community for shared micro-meetups. Romantic advances, flirting, or making other travelers uncomfortable results in an immediate, permanent ban with zero refund of your Verification Pass.&rdquo;
           </p>
-          <div className="pt-2.5 border-t border-slate-200 text-[11px] text-slate-500 space-y-1 font-medium">
-            <p>• Verified real identities and liveness checks on all accounts.</p>
+          <div className="pt-2 border-t border-[#EAE7E2] text-[11px] text-[#6B6966] space-y-1 font-medium">
+            <p>• Verified real identities and liveness checks on all members.</p>
             <p>• Small 2–4 person public commercial venues only.</p>
             <p>• Zero tolerance: 100% of reported accounts frozen instantly.</p>
           </div>
         </div>
 
         {/* 3-Second Hold Button to Sign */}
-        <div className="pt-2 space-y-2">
+        <div className="pt-2 space-y-2.5">
           <button
             id="btn-hold-to-sign-code-of-conduct"
             onMouseDown={startHold}
@@ -89,25 +101,34 @@ export const CodeOfConductModal: React.FC = () => {
             onMouseLeave={endHold}
             onTouchStart={startHold}
             onTouchEnd={endHold}
-            className="relative w-full py-4 px-6 rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden font-bold text-sm text-white select-none transition-all active:scale-[0.98] shadow-lg shadow-slate-300"
+            className="relative w-full py-3.5 px-6 rounded-full bg-[#1A1918] border border-[#1A1918] overflow-hidden font-semibold text-xs text-white select-none transition-all active:scale-[0.98] shadow-sm cursor-pointer"
           >
             {/* Progress Fill Bar */}
             <div
-              className="absolute inset-0 bg-indigo-600 transition-all"
+              className="absolute inset-0 bg-[#E64A2A] transition-all"
               style={{ width: `${holdProgress}%` }}
             />
             <span className="relative z-10 flex items-center justify-center gap-2">
-              <Lock className="w-4 h-4" />
+              <Lock className="w-3.5 h-3.5" />
               <span>
                 {isHolding
                   ? `Holding... ${(3 - (holdProgress / 100) * 3).toFixed(1)}s`
-                  : 'Press & Hold for 3 Seconds to Sign'}
+                  : 'Press & Hold 3 Seconds to Sign'}
               </span>
             </span>
           </button>
-          <p className="text-[11px] text-slate-400 font-medium">
+          
+          <p className="text-[11px] text-[#9C9892]">
             Hold continuously for 3 seconds to legally bind your agreement.
           </p>
+
+          <button
+            type="button"
+            onClick={() => setIsCodeOfConductOpen(false)}
+            className="w-full py-2 text-xs font-semibold text-[#6B6966] hover:text-[#1A1918] transition-colors"
+          >
+            Decline & Return to Browsing
+          </button>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-export type CityCode = 'TYO_JP' | 'LIS_PT';
+export type CityCode = 'TYO_JP' | 'LIS_PT' | 'DPS_ID';
 
 export type PlanCategory = 'dining' | 'cafe_cowork' | 'cultural_sight' | 'outdoor_walk' | 'nightlife';
 
@@ -29,6 +29,8 @@ export interface User {
   origin_flag: string;
   native_language: string;
   code_of_conduct_signed: boolean;
+  social_link?: string;
+  meetups_completed_count?: number;
   created_at: string;
   updated_at: string;
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FellowProvider, useFellow } from './context/FellowContext';
 import { Navigation } from './components/Navigation';
+import { LandingView } from './components/LandingView';
 import { DiscoveryFeed } from './components/DiscoveryFeed';
 import { MyPlansView } from './components/MyPlansView';
 import { ProfileView } from './components/ProfileView';
@@ -12,6 +13,7 @@ import { CitySelectorModal } from './components/CitySelectorModal';
 import { CityWaitlistModal } from './components/CityWaitlistModal';
 import { CodeOfConductModal } from './components/CodeOfConductModal';
 import { SafetyReportModal } from './components/SafetyReportModal';
+import { AuthModal } from './components/AuthModal';
 
 const MainApp: React.FC = () => {
   const {
@@ -25,12 +27,13 @@ const MainApp: React.FC = () => {
   } = useFellow();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white antialiased">
+    <div className="min-h-screen bg-[#F9F8F6] text-[#1A1918] flex flex-col font-sans selection:bg-[#E64A2A] selection:text-white antialiased">
       {/* Navigation Bars (Top App Bar & Fixed Bottom Tab Bar) */}
       <Navigation />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-5xl mx-auto pb-20">
+      <main className="flex-1 w-full max-w-5xl mx-auto pb-20 px-3 sm:px-4">
+        {activeTab === 'landing' && <LandingView />}
         {(activeTab === 'discover' || (activeTab as string) === 'explore') && <DiscoveryFeed />}
         {activeTab === 'my_plans' && <MyPlansView />}
         {activeTab === 'profile' && <ProfileView />}
@@ -46,6 +49,7 @@ const MainApp: React.FC = () => {
 
       <HostPlanModal />
       <VerificationModal />
+      <AuthModal />
 
       {activeChatPlanId && (
         <ExpiringChatModal

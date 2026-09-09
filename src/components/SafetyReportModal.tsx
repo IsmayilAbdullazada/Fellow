@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { X, AlertTriangle, ShieldAlert, CheckCircle } from 'lucide-react';
+import { X, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 import { SafetyReportType } from '../types';
 
 export const SafetyReportModal: React.FC = () => {
   const { reportingTarget, setReportingTarget, submitSafetyReport } = useFellow();
 
-  const [reportType, setReportType] = useState<SafetyReportType>('unwanted_flirting');
+  const [reportType, setReportType] = useState<SafetyReportType | null>(null);
   const [details, setDetails] = useState<string>('');
   const [submitted, setSubmitted] = useState<boolean>(false);
 
@@ -14,6 +14,7 @@ export const SafetyReportModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!reportType) return;
     submitSafetyReport({
       reported_user_id: reportingTarget.userId,
       plan_id: reportingTarget.planId,
@@ -27,40 +28,43 @@ export const SafetyReportModal: React.FC = () => {
   };
 
   return (
-    <div id="safety-report-modal-overlay" className="fixed inset-0 z-70 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-100 rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl p-6 text-slate-900 text-left relative animate-in fade-in zoom-in-95 duration-150">
+    <div
+      id="safety-report-modal-overlay"
+      className="fixed inset-0 z-70 bg-[#1A1918]/60 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div className="bg-white border border-[#EAE7E2] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-[#1A1918] text-left relative animate-in zoom-in-95 duration-150">
         <button
           onClick={() => setReportingTarget(null)}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-900 rounded-xl transition-colors"
+          className="absolute top-5 right-5 p-1.5 text-[#9C9892] hover:text-[#1A1918] rounded-full transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {submitted ? (
           <div className="text-center py-6 space-y-3">
-            <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200 shadow-sm">
-              <ShieldAlert className="w-9 h-9" />
+            <div className="w-16 h-16 rounded-full bg-[#FDF2F2] text-[#DC2626] flex items-center justify-center mx-auto border border-[#F87171] shadow-2xs">
+              <ShieldAlert className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-lg font-extrabold text-slate-900">Instant Safety Trip Activated</h3>
-              <p className="text-xs text-rose-700 mt-1.5 max-w-xs mx-auto leading-relaxed font-medium">
+              <h3 className="font-editorial text-2xl font-semibold text-[#1A1918]">Instant Safety Trip Activated</h3>
+              <p className="text-xs text-[#DC2626] mt-1.5 max-w-xs mx-auto leading-relaxed font-medium">
                 {reportingTarget.name} has been immediately muted. All their listings, RSVPs, and chat messages are now severed from your account.
               </p>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex items-center gap-2 text-rose-600">
+            <div className="flex items-center gap-2 text-[#DC2626]">
               <AlertTriangle className="w-5 h-5" />
-              <h3 className="font-extrabold text-base text-slate-900">Report Safety Concern</h3>
+              <h3 className="font-editorial text-xl font-semibold text-[#1A1918]">Report Safety Concern</h3>
             </div>
 
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Reporting <span className="text-slate-900 font-bold">{reportingTarget.name}</span> triggers an instant safety mute, blocking all future interactions across Fellow.
+            <p className="text-xs text-[#6B6966] leading-relaxed">
+              Reporting <span className="text-[#1A1918] font-semibold">{reportingTarget.name}</span> triggers an instant safety mute, blocking all future interactions across Fellow.
             </p>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Issue Category</label>
+              <label className="text-xs font-semibold text-[#1A1918]">Select Issue Category <span className="text-[#DC2626]">*</span></label>
               <div className="space-y-1.5 text-xs">
                 {[
                   { id: 'unwanted_flirting', label: 'Unwanted flirting / dating advance (Zero Tolerance)' },
@@ -73,8 +77,8 @@ export const SafetyReportModal: React.FC = () => {
                     key={item.id}
                     className={`flex items-center gap-2.5 p-3 rounded-2xl border cursor-pointer transition-all ${
                       reportType === item.id
-                        ? 'border-2 border-rose-600 bg-rose-50 text-rose-900 font-bold shadow-xs'
-                        : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 font-medium'
+                        ? 'border-[#DC2626] bg-[#FDF2F2] text-[#DC2626] font-semibold shadow-2xs'
+                        : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:bg-[#EAE7E2]/50 font-medium'
                     }`}
                   >
                     <input
@@ -82,7 +86,7 @@ export const SafetyReportModal: React.FC = () => {
                       name="report_type"
                       checked={reportType === item.id}
                       onChange={() => setReportType(item.id as SafetyReportType)}
-                      className="text-rose-600 focus:ring-rose-500"
+                      className="text-[#DC2626] focus:ring-[#DC2626]"
                     />
                     <span className="text-xs">{item.label}</span>
                   </label>
@@ -91,24 +95,27 @@ export const SafetyReportModal: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Details (Optional)</label>
+              <label className="text-xs font-semibold text-[#1A1918]">Details (Optional)</label>
               <textarea
                 rows={2}
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
                 placeholder="Describe what occurred. Fellow safety reviews all flagged incidents."
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-rose-500 focus:bg-white resize-none placeholder:text-slate-400"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#DC2626] focus:bg-white resize-none placeholder:text-[#9C9892]"
               />
             </div>
 
             <div className="pt-2">
               <button
-                id="btn-submit-safety-report"
                 type="submit"
-                className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-200 transition-all active:scale-[0.99]"
+                disabled={!reportType}
+                className={`w-full py-3 px-4 rounded-full font-semibold text-xs shadow-sm transition-all ${
+                  reportType
+                    ? 'bg-[#DC2626] hover:bg-[#B91C1C] text-white cursor-pointer active:scale-[0.99]'
+                    : 'bg-[#F9F8F6] text-[#9C9892] border border-[#EAE7E2] cursor-not-allowed'
+                }`}
               >
-                <ShieldAlert className="w-4 h-4" />
-                <span>Trigger Safety Trip & Sever Visibility</span>
+                {reportType ? 'Submit Safety Report & Sever Connection' : 'Select a Category Above'}
               </button>
             </div>
           </form>

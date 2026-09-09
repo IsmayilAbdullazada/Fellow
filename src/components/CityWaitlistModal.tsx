@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
-import {
-  X,
-  MapPin,
-  Calendar,
-  Users,
-  Bell,
-  CheckCircle,
-  Sparkles,
-  ArrowRight,
-} from 'lucide-react';
+import { X, Bell, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
-import { WaitlistRegion } from '../types';
+import { WaitlistRegion, CityCode } from '../types';
 
 interface CityWaitlistModalProps {
   city: WaitlistRegion;
@@ -18,13 +9,14 @@ interface CityWaitlistModalProps {
 }
 
 export const CityWaitlistModal: React.FC<CityWaitlistModalProps> = ({ city, onClose }) => {
-  const { registerWaitlist, currentUser } = useFellow();
+  const { registerWaitlist, currentUser, setActiveCityCode, setActiveTab } = useFellow();
 
   const [arrivalDate, setArrivalDate] = useState<string>('2026-10-15');
   const [departureDate, setDepartureDate] = useState<string>('2026-10-25');
   const [email, setEmail] = useState<string>(currentUser.email || '');
   const [submitted, setSubmitted] = useState<boolean>(false);
 
+  const isUnlocked = city.registered_count >= city.threshold;
   const percentage = Math.min(100, Math.round((city.registered_count / city.threshold) * 100));
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -34,30 +26,80 @@ export const CityWaitlistModal: React.FC<CityWaitlistModalProps> = ({ city, onCl
     setSubmitted(true);
   };
 
+  const handleSwitchToUnlockedHub = () => {
+    if (city.id === 'dps') {
+      setActiveCityCode('DPS_ID' as CityCode);
+    }
+    setActiveTab('discover');
+    onClose();
+  };
+
+  const handleSimulateUnlock = () => {
+    // Push count directly to threshold
+    registerWaitlist(city.id, arrivalDate, departureDate, 'test_200th_member@fellow.travel');
+  };
+
   return (
-    <div id="city-waitlist-modal-overlay" className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white border border-slate-100 rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl p-6 text-slate-900 text-left relative animate-in fade-in zoom-in-95 duration-150">
+    <div
+      id="city-waitlist-modal-overlay"
+      className="fixed inset-0 z-60 bg-[#1A1918]/60 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div className="bg-white border border-[#EAE7E2] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-[#1A1918] text-left relative animate-in zoom-in-95 duration-150">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-900 rounded-xl transition-colors"
+          className="absolute top-5 right-5 p-1.5 text-[#9C9892] hover:text-[#1A1918] rounded-full transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {submitted ? (
+        {isUnlocked ? (
+          <div className="text-center py-4 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] flex items-center justify-center mx-auto shadow-sm animate-in zoom-in-50 duration-300">
+              <Sparkles className="w-8 h-8 stroke-[2.5]" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] text-xs font-semibold mb-2">
+                <span>{city.flag}</span>
+                <span>Cohort Unlocked (200 / 200 Met)</span>
+              </div>
+              <h3 className="font-editorial text-2xl font-semibold text-[#1A1918]">
+                {city.city_name} is Now Live!
+              </h3>
+              <p className="text-xs text-[#6B6966] mt-1.5 leading-relaxed max-w-xs mx-auto">
+                200 verified solo travelers have confirmed trips for {city.city_name}. The pilot hub is actively unlocked for small tables and sunset meetups.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                onClick={handleSwitchToUnlockedHub}
+                className="w-full py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+              >
+                <span>Switch to {city.city_name} Hub Now</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full py-2.5 px-4 rounded-full bg-[#F9F8F6] hover:bg-[#EAE7E2] text-[#1A1918] text-xs font-semibold transition-all cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
+        ) : submitted ? (
           <div className="text-center py-6 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center mx-auto shadow-xl shadow-indigo-300 animate-in zoom-in-50 duration-300">
+            <div className="w-16 h-16 rounded-full bg-[#059669] text-white flex items-center justify-center mx-auto shadow-sm animate-in zoom-in-50 duration-300">
               <CheckCircle className="w-9 h-9 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="text-xl font-extrabold text-slate-900">You're on the list!</h3>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed max-w-xs mx-auto">
-                We will email <span className="font-bold text-slate-900">{email}</span> as soon as {city.city_name} hits 200 verified traveler signups for your dates ({arrivalDate} – {departureDate}).
+              <h3 className="font-editorial text-2xl font-semibold text-[#1A1918]">You're on the list!</h3>
+              <p className="text-xs text-[#6B6966] mt-1.5 leading-relaxed max-w-xs mx-auto">
+                We will email <span className="font-semibold text-[#1A1918]">{email}</span> as soon as {city.city_name} reaches 200 verified travelers for your dates ({arrivalDate} – {departureDate}).
               </p>
             </div>
             <button
               onClick={onClose}
-              className="mt-3 w-full py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all shadow-md shadow-indigo-200 active:scale-[0.99]"
+              className="mt-3 w-full py-3 px-4 rounded-full bg-[#1A1918] hover:bg-[#2E2C29] text-white font-semibold text-xs transition-all shadow-2xs cursor-pointer"
             >
               Return to Active Hubs
             </button>
@@ -66,85 +108,92 @@ export const CityWaitlistModal: React.FC<CityWaitlistModalProps> = ({ city, onCl
           <div className="space-y-4">
             {/* Header */}
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold mb-2.5">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs font-semibold mb-2">
                 <span>{city.flag}</span>
                 <span>{city.country}</span>
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
+              <h3 className="font-editorial text-2xl font-semibold text-[#1A1918] tracking-tight">
                 Fellow isn't live in {city.city_name} yet
               </h3>
-              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                We unlock new hubs strictly when 200 verified travelers are in town to guarantee active, populated meetups without ghosting.
+              <p className="text-xs text-[#6B6966] mt-1.5 leading-relaxed">
+                We unlock new hubs strictly when 200 verified travelers are in town to guarantee active, high-trust meetups without ghosting.
               </p>
             </div>
 
             {/* Traveler Threshold Counter */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4.5 space-y-2.5">
+            <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-800">
+                <span className="font-semibold text-[#1A1918]">
                   {city.registered_count} / {city.threshold} travelers registered
                 </span>
-                <span className="text-indigo-600 font-extrabold text-xs">{percentage}%</span>
+                <span className="text-[#E64A2A] font-bold font-mono-code text-xs">{percentage}%</span>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#EAE7E2] overflow-hidden">
                 <div
-                  className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                  className="h-full bg-[#E64A2A] rounded-full transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
 
-              <p className="text-[11px] text-slate-500 font-medium">
-                Targeting unlock for {city.target_month} travel cohort.
-              </p>
+              <div className="flex items-center justify-between text-[11px] text-[#9C9892]">
+                <span>Targeting unlock for {city.target_month} cohort.</span>
+                <button
+                  type="button"
+                  onClick={handleSimulateUnlock}
+                  className="text-[#E64A2A] hover:underline font-semibold"
+                >
+                  + Add 1 Member (Simulate)
+                </button>
+              </div>
             </div>
 
             {/* Input Form */}
-            <form onSubmit={handleSubmit} className="space-y-3.5 pt-1">
+            <form onSubmit={handleSubmit} className="space-y-3 pt-1">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">
+                <label className="text-xs font-semibold text-[#1A1918]">
                   When are you visiting {city.city_name}?
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block mb-0.5">Arrival</span>
+                    <span className="text-[10px] text-[#9C9892] font-semibold block mb-0.5">Arrival</span>
                     <input
                       type="date"
                       required
                       value={arrivalDate}
                       onChange={(e) => setArrivalDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white font-medium"
+                      className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white font-medium"
                     />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block mb-0.5">Departure</span>
+                    <span className="text-[10px] text-[#9C9892] font-semibold block mb-0.5">Departure</span>
                     <input
                       type="date"
                       required
                       value={departureDate}
                       onChange={(e) => setDepartureDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white font-medium"
+                      className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white font-medium"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Email for Hub Unlock Notice</label>
+                <label className="text-xs font-semibold text-[#1A1918]">Email for Hub Unlock Notice</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your.email@nomad.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white placeholder:text-slate-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white placeholder:text-[#9C9892]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-lg shadow-indigo-200"
+                className="w-full py-3 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
               >
                 <Bell className="w-4 h-4" />
                 <span>Notify Me When Unlocked</span>

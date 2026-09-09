@@ -9,11 +9,10 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Users,
   Lock,
-  Sparkles,
-  AlertCircle,
   Plus,
+  AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 import { PlanCategory, MicroPlan } from '../types';
@@ -29,7 +28,6 @@ export const DiscoveryFeed: React.FC = () => {
     setSelectedPlanId,
     setIsHostModalOpen,
     isTripActive,
-    currentTrip,
     mutedUserIds,
     setActiveTab,
   } = useFellow();
@@ -52,8 +50,7 @@ export const DiscoveryFeed: React.FC = () => {
       // 3. Instant Safety Trip check: hide plans from muted/reported hosts
       if (mutedUserIds.includes(plan.host_user_id)) return false;
 
-      // 4. Gender-Safe Visibility Rule (PRD 5.1 & Part 1.4):
-      // If female_only is true on the plan, only users where gender === 'female' can view/join
+      // 4. Gender-Safe Visibility Rule
       if (plan.female_only && currentUser.gender !== 'female') {
         return false;
       }
@@ -86,7 +83,6 @@ export const DiscoveryFeed: React.FC = () => {
           if (!isSameDay(planDate, tomorrow)) return false;
         } else if (selectedDateFilter === 'weekend') {
           const day = planDate.getDay();
-          // Friday evening (5), Saturday (6), Sunday (0)
           if (day !== 0 && day !== 6 && day !== 5) return false;
         }
       }
@@ -95,33 +91,26 @@ export const DiscoveryFeed: React.FC = () => {
     });
   }, [plans, activeCityCode, mutedUserIds, currentUser.gender, femaleOnlyFilter, selectedCategory, selectedDateFilter]);
 
-  const getCategoryIcon = (category: PlanCategory) => {
-    switch (category) {
-      case 'dining':
-        return <Utensils className="w-3.5 h-3.5" />;
-      case 'cafe_cowork':
-        return <Coffee className="w-3.5 h-3.5" />;
-      case 'cultural_sight':
-        return <Landmark className="w-3.5 h-3.5" />;
-      case 'outdoor_walk':
-        return <Footprints className="w-3.5 h-3.5" />;
-      case 'nightlife':
-        return <Wine className="w-3.5 h-3.5" />;
-    }
-  };
+  // Counts for category badges
+  const cityPlans = plans.filter((p) => p.city_code === activeCityCode && p.status !== 'cancelled');
+  const countAll = cityPlans.length;
+  const countDining = cityPlans.filter((p) => p.category === 'dining').length;
+  const countCafe = cityPlans.filter((p) => p.category === 'cafe_cowork').length;
+  const countCulture = cityPlans.filter((p) => p.category === 'cultural_sight').length;
+  const countNightlife = cityPlans.filter((p) => p.category === 'nightlife').length;
 
   const getCategoryLabel = (category: PlanCategory) => {
     switch (category) {
       case 'dining':
-        return 'Dining';
+        return 'DINING';
       case 'cafe_cowork':
-        return 'Cafe & Cowork';
+        return 'CAFE & CO-WORK';
       case 'cultural_sight':
-        return 'Culture';
+        return 'CULTURE';
       case 'outdoor_walk':
-        return 'Walk / Hike';
+        return 'WALK & HIKE';
       case 'nightlife':
-        return 'Nightlife';
+        return 'NIGHTLIFE';
     }
   };
 
@@ -135,7 +124,7 @@ export const DiscoveryFeed: React.FC = () => {
   const formatPlanDateTime = (startTimeStr: string, endTimeStr: string) => {
     const start = new Date(startTimeStr);
     const end = new Date(endTimeStr);
-    const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    const diffHours = ((end.getTime() - start.getTime()) / (1000 * 60 * 60)).toFixed(1);
 
     const isToday = new Date().toDateString() === start.toDateString();
     const isTomorrow =
@@ -146,43 +135,48 @@ export const DiscoveryFeed: React.FC = () => {
     else if (isTomorrow) dayLabel = 'Tomorrow';
 
     const timeLabel = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    return `${dayLabel} · ${timeLabel} (${diffHours} hrs)`;
+    return `${dayLabel} · ${timeLabel} (${diffHours.replace('.0', '')} hrs)`;
   };
 
   return (
-    <div id="discovery-feed-container" className="max-w-5xl mx-auto px-4 py-6 pb-24 space-y-5">
+    <div id="discovery-feed-container" className="max-w-5xl mx-auto px-4 py-5 pb-24 space-y-4">
       {/* Trip Inactive / Decay Notice banner if user has no trip logged */}
       {!isTripActive && (
-        <div id="trip-decay-alert-banner" className="bg-amber-50 border-2 border-amber-200 rounded-[28px] p-5 flex items-start gap-3.5 text-amber-900 shadow-sm">
-          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="font-bold text-amber-900 text-sm">Active Trip Window Required</p>
-            <p className="text-amber-800/90 text-xs mt-0.5 leading-relaxed">
-              Fellow enforces anti-ghosting: your profile and listings are only visible while you have an active trip window logged in {city.name}.
+        <div
+          id="trip-decay-alert-banner"
+          className="bg-white border border-[#EAE7E2] rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 text-[#1A1918] shadow-2xs"
+        >
+          <div className="w-9 h-9 rounded-full bg-[#D97706]/10 text-[#D97706] flex items-center justify-center shrink-0 mt-0.5">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="font-semibold text-[#1A1918] text-sm">Active Trip Window Required</p>
+            <p className="text-[#6B6966] text-xs mt-0.5 leading-relaxed">
+              Fellow enforces anti-ghosting: your profile and meetup participation are only active while you have dates logged in {city.name}.
             </p>
             <button
               onClick={() => setActiveTab('profile')}
-              className="mt-3 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-xl shadow-sm transition-all"
+              className="mt-2.5 text-xs font-semibold bg-[#1A1918] hover:bg-[#2E2C29] text-white px-3.5 py-1.5 rounded-full transition-all active:scale-95"
             >
-              Log Dates for {city.name}
+              Log Travel Dates for {city.name}
             </button>
           </div>
         </div>
       )}
 
-      {/* Sub-Header Filters & Categories matching Vibrant Palette */}
-      <div className="bg-white rounded-3xl border-2 border-slate-100 p-4 sm:p-5 shadow-sm space-y-3.5">
-        {/* Date Filter Row */}
+      {/* Screen 1 Filter Surface: Category Carousel & Date Selector */}
+      <div className="bg-white rounded-2xl border border-[#EAE7E2] p-3.5 sm:p-4 shadow-2xs space-y-3">
+        {/* Date Filter Row + Persistent Female Only Pill */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs no-scrollbar">
             {(['all', 'today', 'tomorrow', 'weekend'] as const).map((filterKey) => (
               <button
                 key={filterKey}
                 onClick={() => setSelectedDateFilter(filterKey)}
-                className={`px-4 py-2 rounded-xl font-bold transition-all shrink-0 capitalize ${
+                className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 capitalize text-xs ${
                   selectedDateFilter === filterKey
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200'
+                    ? 'bg-[#1A1918] text-white'
+                    : 'bg-[#F9F8F6] hover:bg-[#EAE7E2] text-[#6B6966] border border-[#EAE7E2]'
                 }`}
               >
                 {filterKey === 'all' ? 'All Dates' : filterKey === 'weekend' ? 'Weekend' : filterKey}
@@ -190,213 +184,256 @@ export const DiscoveryFeed: React.FC = () => {
             ))}
           </div>
 
-          {/* Safety Toggle: Female-Only Pill */}
+          {/* Rightmost Persistent Pill: 🛡️ Female Only */}
           <div className="shrink-0">
             {currentUser.gender === 'female' ? (
               <button
                 id="filter-female-only-toggle"
                 onClick={() => setFemaleOnlyFilter(!femaleOnlyFilter)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-semibold text-[11px] uppercase tracking-[0.06em] transition-all border ${
                   femaleOnlyFilter
-                    ? 'bg-purple-600 border-purple-600 text-white shadow-sm'
-                    : 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'
+                    ? 'bg-[#FDF2F4] border-[#FBCFE8] text-[#9D174D] shadow-2xs'
+                    : 'bg-white border-[#EAE7E2] text-[#6B6966] hover:border-[#D1CDC7]'
                 }`}
               >
-                <span className="text-sm">♀</span>
+                <span className="text-sm">🛡️</span>
                 <span>Female Only</span>
               </button>
             ) : (
               <div
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 text-xs shrink-0 cursor-not-allowed"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#F9F8F6] border border-[#EAE7E2] text-[#9C9892] text-[11px] font-medium shrink-0 cursor-not-allowed"
                 title="Female-only plans are restricted to verified female solo travelers"
               >
-                <Lock className="w-3.5 h-3.5" />
+                <Lock className="w-3 h-3" />
                 <span>Female Only</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs sm:text-sm no-scrollbar pt-1 border-t border-slate-100">
+        {/* Category Carousel (Horizontal scrolling, hairline border chips) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar pt-2 border-t border-[#EAE7E2]">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-full font-bold flex items-center gap-2 transition-all shrink-0 border ${
+            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
               selectedCategory === 'all'
-                ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-500 border-slate-200'
+                ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
+                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
             }`}
           >
-            {selectedCategory === 'all' && <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>}
-            <span>All Plans</span>
+            <span>All ({countAll})</span>
           </button>
 
-          {(['dining', 'cafe_cowork', 'cultural_sight', 'outdoor_walk', 'nightlife'] as PlanCategory[]).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-all shrink-0 border ${
-                selectedCategory === cat
-                  ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                  : 'bg-slate-50 hover:bg-slate-100 text-slate-500 border-slate-200'
-              }`}
-            >
-              {selectedCategory === cat && <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>}
-              <span>{getCategoryIcon(cat)}</span>
-              <span>{getCategoryLabel(cat)}</span>
-            </button>
-          ))}
+          <button
+            onClick={() => setSelectedCategory('dining')}
+            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+              selectedCategory === 'dining'
+                ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
+                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+            }`}
+          >
+            <Utensils className="w-3.5 h-3.5" />
+            <span>Dinner & Drinks ({countDining})</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedCategory('cafe_cowork')}
+            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+              selectedCategory === 'cafe_cowork'
+                ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
+                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+            }`}
+          >
+            <Coffee className="w-3.5 h-3.5" />
+            <span>Cafe & Co-work ({countCafe})</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedCategory('cultural_sight')}
+            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+              selectedCategory === 'cultural_sight'
+                ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
+                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+            }`}
+          >
+            <Landmark className="w-3.5 h-3.5" />
+            <span>Walking & Culture ({countCulture})</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedCategory('nightlife')}
+            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+              selectedCategory === 'nightlife'
+                ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
+                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+            }`}
+          >
+            <Wine className="w-3.5 h-3.5" />
+            <span>Nightlife ({countNightlife})</span>
+          </button>
         </div>
       </div>
 
-      {/* Main Card Grid (Micro-Plan Cards) - 2 Column Responsive Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+      {/* Main Vertical Feed: Micro-Plan Bento Cards (Spec Section 4.1) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
         {filteredPlans.length > 0 ? (
           filteredPlans.map((plan) => {
             const host = allUsers.find((u) => u.id === plan.host_user_id);
             const planParticipants = participants.filter((p) => p.plan_id === plan.id && p.rsvp_status === 'confirmed');
             const spotsFilled = planParticipants.length;
+            const spotsRemaining = Math.max(0, plan.max_participants - spotsFilled);
+
+            // Generate dot indicators: ● for filled, ○ for open
+            const dots = [];
+            for (let i = 0; i < plan.max_participants; i++) {
+              dots.push(i < spotsFilled ? '●' : '○');
+            }
 
             return (
               <div
                 key={plan.id}
                 id={`micro-plan-card-${plan.id}`}
                 onClick={() => setSelectedPlanId(plan.id)}
-                className="group relative bg-white border-2 border-slate-100 rounded-[32px] p-6 shadow-sm flex flex-col justify-between hover:border-indigo-200 hover:shadow-md transition-all duration-200 cursor-pointer text-left active:scale-[0.99]"
+                className="group relative bg-white border border-[#EAE7E2] rounded-2xl p-5 shadow-bento flex flex-col justify-between hover:border-[#D1CDC7] transition-all duration-200 cursor-pointer text-left active:scale-[0.985]"
               >
                 <div>
-                  {/* Top: Host Snapshot & Badges */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <img
-                          src={host?.profile_photo_url}
-                          alt={host?.display_name || 'Host'}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-indigo-500"
-                        />
-                        {host?.is_verified && (
-                          <div className="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-0.5 border-2 border-white shadow-sm" title="Verified Traveler ID">
-                            <ShieldCheck className="w-2.5 h-2.5 stroke-[2.5]" />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900 text-base">
-                          {host?.display_name}{' '}
-                          {host?.date_of_birth && (
-                            <span className="text-slate-400 font-normal text-sm">{calculateAge(host.date_of_birth)}</span>
-                          )}
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          {host?.origin_flag} {host?.origin_country} • ⭐️ {host?.reliability_score}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Category pill */}
+                  {/* Top: Category Pill + Spots Left with Dots (●●○○) */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2.5 py-1 rounded-md bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918]">
+                        {getCategoryLabel(plan.category)}
+                      </span>
                       {plan.female_only && (
-                        <span className="bg-purple-50 text-purple-700 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md border border-purple-200">
-                          ♀ Only
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2 py-1 rounded-md bg-[#FDF2F4] border border-[#FBCFE8] text-[#9D174D]">
+                          ♀ Female Only
                         </span>
                       )}
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md ${
-                        plan.category === 'dining'
-                          ? 'bg-indigo-50 text-indigo-700'
-                          : plan.category === 'outdoor_walk'
-                          ? 'bg-amber-50 text-amber-700'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {getCategoryLabel(plan.category)}
+                    </div>
+
+                    {/* Spots Left indicator with dots: [Spots Left: 2 of 4] ●●○○ */}
+                    <div className="flex items-center gap-1.5 text-xs text-[#6B6966] font-medium">
+                      <span>Spots: {spotsRemaining} of {plan.max_participants}</span>
+                      <span className="font-mono-code text-sm tracking-tight text-[#E64A2A] font-bold">
+                        {dots.join('')}
                       </span>
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h4 className="text-xl font-extrabold text-slate-900 leading-tight mb-2 group-hover:text-indigo-600 transition-colors">
+                  {/* Title (Editorial Serif font, 20pt, bold, high contrast) */}
+                  <h3 className="font-editorial text-[20px] leading-[26px] font-semibold text-[#1A1918] mb-3 group-hover:text-[#E64A2A] transition-colors">
                     {plan.title}
-                  </h4>
+                  </h3>
 
-                  {/* Description snippet */}
-                  <p className="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-2">
+                  {/* Bento Box: Venue & Timing Box */}
+                  <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-3 space-y-1.5 text-xs text-[#6B6966]">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5 text-[#1A1918] shrink-0" />
+                      <span className="font-medium text-[#1A1918]">
+                        {formatPlanDateTime(plan.start_time, plan.end_time)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-[#6B6966] shrink-0" />
+                      <span className="truncate text-[#6B6966]">
+                        {plan.venue_name} · {plan.venue_address}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Plan excerpt */}
+                  <p className="text-xs text-[#6B6966] leading-relaxed mt-3 line-clamp-2">
                     {plan.description}
                   </p>
-
-                  {/* Location & Time */}
-                  <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-500 font-medium bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <span>📍</span>
-                      <span className="truncate">{plan.venue_name}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-slate-900 font-bold shrink-0 ml-auto">
-                      <span>⏰</span>
-                      <span>{formatPlanDateTime(plan.start_time, plan.end_time)}</span>
-                    </div>
-                  </div>
                 </div>
 
-                {/* Card Footer: Capacity Counter & Confirmed Member Circles */}
-                <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex -space-x-3">
-                      {planParticipants.slice(0, 3).map((p) => {
-                        const user = allUsers.find((u) => u.id === p.user_id);
-                        return (
-                          <img
-                            key={p.id}
-                            src={user?.profile_photo_url}
-                            alt={user?.display_name}
-                            className="w-10 h-10 bg-slate-200 rounded-full border-2 border-white object-cover"
-                            title={user?.display_name}
-                          />
-                        );
-                      })}
-                      {spotsFilled > 3 && (
-                        <div className="w-10 h-10 bg-slate-100 rounded-full border-2 border-white flex items-center justify-center text-slate-500 text-xs font-bold">
-                          +{spotsFilled - 3}
-                        </div>
-                      )}
-                      {spotsFilled === 0 && (
-                        <div className="w-10 h-10 border-2 border-dashed border-slate-200 rounded-full text-slate-400 flex items-center justify-center text-[10px] font-bold">
-                          EMPTY
+                {/* Hairline Divider + Host Avatar with Verified Shield */}
+                <div className="mt-4 pt-3.5 hairline-divider flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="relative shrink-0">
+                      <img
+                        src={host?.profile_photo_url}
+                        alt={host?.display_name || 'Host'}
+                        className="w-9 h-9 rounded-full object-cover border border-[#EAE7E2]"
+                      />
+                      {host?.is_verified && (
+                        <div
+                          className="absolute -bottom-0.5 -right-0.5 bg-[#059669] text-white rounded-full p-0.5 border border-white"
+                          title="Verified Passport ID"
+                        >
+                          <ShieldCheck className="w-2.5 h-2.5 stroke-[2.5]" />
                         </div>
                       )}
                     </div>
-                    <span className="text-xs font-semibold text-slate-500 ml-1">
-                      <span className={spotsFilled === plan.max_participants ? 'text-amber-600 font-bold' : 'text-indigo-600 font-bold'}>
-                        {spotsFilled}/{plan.max_participants}
-                      </span>{' '}
-                      spots
-                    </span>
+                    <div className="truncate">
+                      <p className="text-xs font-semibold text-[#1A1918] truncate">
+                        Hosted by {host?.display_name} ({host?.date_of_birth ? calculateAge(host.date_of_birth) : 28} · {host?.origin_flag})
+                      </p>
+                      <p className="text-[11px] text-[#6B6966] truncate mt-0.5">
+                        Reliability Score: {host?.reliability_score}% · {spotsFilled} joined
+                      </p>
+                    </div>
                   </div>
 
-                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 sm:px-6 py-2.5 rounded-2xl font-bold text-sm shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all active:scale-95">
-                    Join ($10 Dep)
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPlanId(plan.id);
+                    }}
+                    className="shrink-0 px-3.5 py-1.5 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-medium text-xs shadow-2xs active:scale-95 transition-all"
+                  >
+                    View Plan
                   </button>
                 </div>
               </div>
             );
           })
         ) : (
-          /* Empty State */
-          <div id="discovery-empty-state" className="col-span-full bg-white border-2 border-slate-100 rounded-[32px] p-10 text-center space-y-4 shadow-sm">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto shadow-inner">
-              <Calendar className="w-7 h-7" />
+          /* Screen 6.1: Zero-State with Architectural Tokyo/Lisbon Vector */
+          <div
+            id="discovery-empty-state"
+            className="col-span-full bg-white border border-[#EAE7E2] rounded-2xl p-10 text-center space-y-4 shadow-bento"
+          >
+            {/* Atmospheric Architectural Silhouette (Tokyo Tower or Tram 28) */}
+            <div className="w-20 h-20 mx-auto text-[#6B6966]/40 flex items-center justify-center">
+              {activeCityCode === 'TYO_JP' ? (
+                /* Tokyo Tower Architectural Vector */
+                <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none stroke-[1.5]">
+                  <path d="M50 10 L50 20 M45 20 L55 20 M50 20 L35 90 M50 20 L65 90 M40 45 L60 45 M36 65 L64 65 M30 90 L70 90 M42 90 L50 75 L58 90" />
+                  <circle cx="50" cy="10" r="2" fill="currentColor" />
+                </svg>
+              ) : (
+                /* Lisbon Tram 28 Vector */
+                <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none stroke-[1.5]">
+                  <rect x="20" y="30" width="60" height="45" rx="6" />
+                  <line x1="20" y1="50" x2="80" y2="50" />
+                  <line x1="32" y1="30" x2="32" y2="50" />
+                  <line x1="48" y1="30" x2="48" y2="50" />
+                  <line x1="64" y1="30" x2="64" y2="50" />
+                  <circle cx="35" cy="78" r="5" />
+                  <circle cx="65" cy="78" r="5" />
+                  <line x1="15" y1="83" x2="85" y2="83" />
+                  <path d="M50 30 L50 18 L60 18" />
+                </svg>
+              )}
             </div>
-            <h4 className="text-lg font-extrabold text-slate-900">
-              No plans scheduled for this window
-            </h4>
-            <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-              Be the one who starts it. Post a 2–4 hour micro-plan at any public cafe, restaurant, or landmark in {city.name}.
-            </p>
+
+            <div className="space-y-1.5">
+              <h4 className="font-editorial text-xl font-semibold text-[#1A1918]">
+                No plans scheduled for this window.
+              </h4>
+              <p className="text-xs text-[#6B6966] max-w-md mx-auto leading-relaxed">
+                There are currently 28 verified travelers in {city.name} looking for things to do. Be the one to set the table.
+              </p>
+            </div>
+
             <div className="pt-2">
               <button
                 id="btn-empty-state-create-plan"
                 onClick={() => setIsHostModalOpen(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-200 active:scale-95 transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-medium text-xs shadow-md shadow-[#E64A2A]/20 active:scale-95 transition-all"
               >
-                <Plus className="w-5 h-5 stroke-[2.5]" />
-                <span>Create a Plan</span>
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Host a 2-Hour Plan</span>
               </button>
             </div>
           </div>

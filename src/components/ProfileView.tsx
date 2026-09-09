@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
 import {
   ShieldCheck,
-  Award,
   Calendar,
-  Globe,
-  Clock,
-  User,
-  CheckCircle,
-  AlertTriangle,
-  RefreshCw,
-  Sparkles,
+  AlertCircle,
+  Award,
   Lock,
+  CheckCircle,
 } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 import { CITY_HUBS } from '../data/mockData';
@@ -18,6 +13,7 @@ import { CITY_HUBS } from '../data/mockData';
 export const ProfileView: React.FC = () => {
   const {
     currentUser,
+    allUsers,
     currentTrip,
     isTripActive,
     updateCurrentUserTripDates,
@@ -48,132 +44,188 @@ export const ProfileView: React.FC = () => {
     setTimeout(() => setTripSavedNotice(false), 2500);
   };
 
+  const calculateAge = (dobString?: string) => {
+    if (!dobString) return 28;
+    const dob = new Date(dobString);
+    const diffMs = Date.now() - dob.getTime();
+    const ageDate = new Date(diffMs);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
+
   return (
-    <div id="profile-view-container" className="max-w-4xl mx-auto px-4 py-6 pb-24 space-y-5 text-left">
-      {/* Profile Header Card */}
-      <div className="bg-white border-2 border-slate-100 rounded-[32px] p-6 sm:p-7 shadow-sm space-y-5">
-        <div className="flex items-center gap-4">
-          <div className="relative shrink-0">
-            <img
-              src={currentUser.profile_photo_url}
-              alt={currentUser.display_name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500"
-            />
-            {currentUser.is_verified && (
-              <div className="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1 border-2 border-white shadow-sm">
-                <ShieldCheck className="w-3.5 h-3.5 stroke-[2.5]" />
+    <div id="profile-view-container" className="max-w-3xl mx-auto px-4 py-6 pb-28 space-y-6 text-left">
+      {/* Component 4.2: The "Verified Passport" Status Card */}
+      <div
+        id="verified-passport-status-card"
+        className="relative overflow-hidden bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-5"
+      >
+        {/* Subtle Guilloche / Watermark Pattern */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full border-[12px] border-[#EAE7E2]/40 pointer-events-none" />
+        <div className="absolute top-3 right-5 text-[9px] font-mono-code uppercase tracking-[0.2em] text-[#9C9892]">
+          FELLOW GLOBAL VERIFIED · KYC v5
+        </div>
+
+        {/* Passport Header Row */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {/* Biometric KYC Squircle with Emerald Ring */}
+            <div className="relative shrink-0">
+              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-[22px] overflow-hidden border-2 border-[#059669] shadow-sm bg-[#F9F8F6]">
+                <img
+                  src={currentUser.profile_photo_url}
+                  alt={currentUser.display_name}
+                  className="w-full h-full object-cover"
+                />
               </div>
-            )}
+              {currentUser.is_verified && (
+                <div
+                  className="absolute -bottom-1 -right-1 bg-[#059669] text-white rounded-full p-1 border-2 border-white shadow-xs"
+                  title="Stripe Biometric Liveness Passed"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 stroke-[2.5]" />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#1A1918]">
+                  {currentUser.display_name}
+                </h2>
+                <span className="text-xl" title={currentUser.origin_country}>
+                  {currentUser.origin_flag}
+                </span>
+              </div>
+              <p className="text-xs text-[#6B6966] mt-0.5 font-medium">
+                {calculateAge(currentUser.date_of_birth)} yrs · {currentUser.origin_country} · {currentUser.gender === 'female' ? 'Female Solo' : 'Solo Traveler'}
+              </p>
+              <div className="mt-1.5 flex items-center gap-2">
+                {currentUser.is_verified ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#059669] text-[11px] font-semibold tracking-wide">
+                    <ShieldCheck className="w-3 h-3 stroke-[2.5]" />
+                    <span>VERIFIED PASSPORT ID</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFFBEB] border border-[#FDE68A] text-[#D97706] text-[11px] font-semibold">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>UNVERIFIED ACCOUNT</span>
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-extrabold text-slate-900 truncate">{currentUser.full_name}</h2>
-              <span className="text-base shrink-0">{currentUser.origin_flag}</span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Display name: <strong className="text-slate-800">{currentUser.display_name}</strong> · {currentUser.origin_country}
+          {/* Cryptographic Ref Hash */}
+          <div className="hidden sm:flex flex-col items-end text-right">
+            <span className="text-[10px] uppercase font-mono-code text-[#9C9892]">Hash Signature</span>
+            <span className="text-xs font-mono-code font-bold text-[#1A1918] bg-[#F9F8F6] px-2 py-1 rounded border border-[#EAE7E2] mt-0.5">
+              FEL-{currentUser.id.slice(-4).toUpperCase()}-TYO-SEC
+            </span>
+          </div>
+        </div>
+
+        {/* Passport Biometric Specs Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-xs">
+          <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-2.5">
+            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Document Check</span>
+            <p className="font-semibold text-[#1A1918] mt-0.5">
+              {currentUser.is_verified ? 'Passport / Gov ID' : 'Pending Scan'}
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Native language: {currentUser.native_language}
+          </div>
+          <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-2.5">
+            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Biometric 3D Mesh</span>
+            <p className="font-semibold text-[#1A1918] mt-0.5">
+              {currentUser.is_verified ? 'Liveness Confirmed' : 'Not Captured'}
+            </p>
+          </div>
+          <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-2.5">
+            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Global Pass</span>
+            <p className="font-semibold text-[#1A1918] mt-0.5">
+              {currentUser.has_paid_pass ? '$9.99 Lifetime Active' : 'Unpaid'}
+            </p>
+          </div>
+          <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-2.5">
+            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Reliability Score</span>
+            <p className="font-semibold text-[#059669] mt-0.5">
+              {currentUser.reliability_score}% ({currentUser.meetups_completed_count ?? 3} meetups)
             </p>
           </div>
         </div>
 
-        {/* Verification Status Banner */}
-        {currentUser.is_verified && currentUser.has_paid_pass ? (
-          <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-indigo-600" />
-              <span className="font-bold text-indigo-900">
-                Verified Global Pass Active ($9.99 Paid)
-              </span>
-            </div>
-            <span className="text-[10px] text-indigo-600 font-bold bg-white px-2.5 py-0.5 rounded-full border border-indigo-100 shadow-sm">Lifetime KYC</span>
-          </div>
-        ) : (
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-2 text-xs">
+        {/* Verification Trigger if unverified */}
+        {!currentUser.is_verified && (
+          <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <p className="font-bold text-amber-900">Unverified Profile</p>
-              <p className="text-[11px] text-amber-800/80">
-                Complete Stripe Identity scan to unlock hosting & RSVPing.
+              <p className="text-xs font-semibold text-[#D97706]">Complete One-Time Stripe Identity Check</p>
+              <p className="text-[11px] text-[#B45309]">
+                Verification is required to host or attend micro-plans in Tokyo and Lisbon.
               </p>
             </div>
             <button
               onClick={startVerificationFlow}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shrink-0 transition-colors shadow-md shadow-indigo-200"
+              className="px-4 py-2 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-xs transition-all shadow-sm active:scale-95 shrink-0"
             >
-              Verify ($9.99)
+              Verify Identity ($9.99)
             </button>
           </div>
         )}
 
-        {/* Reliability Score Box (PRD Part 4.1) */}
-        <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <div className="flex items-center gap-1.5 text-indigo-600 mb-0.5">
-              <Award className="w-4 h-4" />
-              <span className="font-extrabold text-lg">{currentUser.reliability_score}%</span>
-            </div>
-            <span className="text-xs font-bold text-slate-800 block">Reliability Score</span>
-            <span className="text-[10px] text-slate-400 block mt-0.5">
-              Begins at 100% · Guaranteed anti-ghosting
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <div className="flex items-center gap-1.5 text-indigo-600 mb-0.5">
-              <Lock className="w-4 h-4 text-indigo-600" />
-              <span className="font-extrabold text-lg">${currentUser.deposit_balance_cents / 100}</span>
-            </div>
-            <span className="text-xs font-bold text-slate-800 block">Pre-Auth Deposit</span>
-            <span className="text-[10px] text-slate-400 block mt-0.5">
-              $10 hold per RSVP · Released on QR scan
-            </span>
-          </div>
+        {/* Bio & Social Reference */}
+        <div className="pt-2 border-t border-[#EAE7E2] space-y-2 text-xs">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#9C9892]">
+            Traveler Bio & Context
+          </span>
+          <p className="text-[#6B6966] leading-relaxed italic">"{currentUser.bio}"</p>
+          {currentUser.social_link && (
+            <p className="text-[11px] text-[#9C9892] font-mono-code pt-0.5">
+              Verified Handle: {currentUser.social_link}
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Active Trip Window & Temporal Decay Manager (PRD Rule 1) */}
-      <div className="bg-white border-2 border-slate-100 rounded-[32px] p-6 sm:p-7 shadow-sm space-y-4">
+      {/* Temporal Decay Hub Trip Dates Card */}
+      <div className="bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-indigo-600" />
-            <h3 className="font-extrabold text-base text-slate-900">Active Hub Trip Dates ({city.name})</h3>
+            <Calendar className="w-4 h-4 text-[#E64A2A]" />
+            <h3 className="font-semibold text-sm text-[#1A1918]">
+              Active Hub Trip Dates ({city.name})
+            </h3>
           </div>
           {isTripActive ? (
-            <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
               Active Traveler
             </span>
           ) : (
-            <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#F9F8F6] text-[#9C9892] border border-[#EAE7E2]">
               Decayed / Departed
             </span>
           )}
         </div>
 
-        <p className="text-xs text-slate-500 leading-relaxed">
-          <strong className="text-slate-800">Temporal Decay Rule:</strong> Profiles and listings are visible exclusively during your trip dates. All presence automatically decays and disappears 24 hours after departure to eliminate ghost profiles.
+        <p className="text-xs text-[#6B6966] leading-relaxed">
+          <strong className="text-[#1A1918] font-semibold">Temporal Decay Rule:</strong> Profiles and listings are visible exclusively during your active trip dates. All presence automatically decays and disappears 24 hours after departure to eliminate ghost profiles.
         </p>
 
         <form onSubmit={handleSaveTrip} className="space-y-3 pt-1">
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-600">Arrival Date</label>
+              <label className="text-[11px] font-semibold text-[#6B6966]">Arrival Date</label>
               <input
                 type="date"
                 value={arrivalDate}
                 onChange={(e) => setArrivalDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:outline-none focus:border-indigo-500 focus:bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] font-medium focus:outline-none focus:border-[#E64A2A]"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-600">Departure Date</label>
+              <label className="text-[11px] font-semibold text-[#6B6966]">Departure Date</label>
               <input
                 type="date"
                 value={departureDate}
                 onChange={(e) => setDepartureDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:outline-none focus:border-indigo-500 focus:bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] font-medium focus:outline-none focus:border-[#E64A2A]"
               />
             </div>
           </div>
@@ -181,12 +233,12 @@ export const ProfileView: React.FC = () => {
           <div className="flex items-center justify-between pt-1">
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-200 transition-all active:scale-95"
+              className="px-5 py-2.5 rounded-full bg-[#1A1918] hover:bg-[#2E2C29] text-white font-semibold text-xs transition-all active:scale-95"
             >
               Update Trip Window
             </button>
             {tripSavedNotice && (
-              <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+              <span className="text-xs text-[#059669] font-semibold flex items-center gap-1">
                 <CheckCircle className="w-3.5 h-3.5" />
                 <span>Trip dates updated!</span>
               </span>
@@ -195,88 +247,79 @@ export const ProfileView: React.FC = () => {
         </form>
       </div>
 
-      {/* Switch Persona Simulation Bar */}
-      <div className="bg-white border-2 border-slate-100 rounded-[32px] p-6 sm:p-7 shadow-sm space-y-4">
+      {/* Switch Persona Simulation Bar for Evaluation */}
+      <div className="bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-extrabold text-base text-slate-900">Switch Test Persona</h3>
-          <span className="text-[11px] font-bold text-slate-400">Fast-switch MVP roles</span>
+          <h3 className="font-semibold text-sm text-[#1A1918]">Switch Test Persona</h3>
+          <span className="text-[11px] text-[#9C9892]">Fast-switch MVP roles</span>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#6B6966]">
           Switch between personas to test verification requirements, host check-in QR codes, and female-only safety policies:
         </p>
 
-        <div className="grid grid-cols-2 gap-3 text-xs">
-          <button
-            onClick={() => switchPersona('usr_elena_nomad')}
-            className={`p-3 rounded-2xl border-2 text-left transition-all ${
-              currentUser.id === 'usr_elena_nomad'
-                ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 font-bold shadow-sm'
-                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-200'
-            }`}
-          >
-            <p className="font-bold text-slate-900">Elena Rostova 🇪🇪</p>
-            <span className="text-[11px] text-slate-500 font-medium">Verified Nomad · Guest</span>
-          </button>
-
-          <button
-            onClick={() => switchPersona('usr_sakura_host')}
-            className={`p-3 rounded-2xl border-2 text-left transition-all ${
-              currentUser.id === 'usr_sakura_host'
-                ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 font-bold shadow-sm'
-                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-200'
-            }`}
-          >
-            <p className="font-bold text-slate-900">Sakura Tanaka 🇯🇵</p>
-            <span className="text-[11px] text-slate-500 font-medium">Female Host · Tokyo</span>
-          </button>
-
-          <button
-            onClick={() => switchPersona('usr_mateo_lisbon')}
-            className={`p-3 rounded-2xl border-2 text-left transition-all ${
-              currentUser.id === 'usr_mateo_lisbon'
-                ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 font-bold shadow-sm'
-                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-200'
-            }`}
-          >
-            <p className="font-bold text-slate-900">Mateo Silva 🇵🇹</p>
-            <span className="text-[11px] text-slate-500 font-medium">Verified Host · Lisbon</span>
-          </button>
-
-          <button
-            onClick={() => switchPersona('usr_alex_backpacker')}
-            className={`p-3 rounded-2xl border-2 text-left transition-all ${
-              currentUser.id === 'usr_alex_backpacker'
-                ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 font-bold shadow-sm'
-                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-200'
-            }`}
-          >
-            <p className="font-bold text-slate-900">Alex Chen 🇺🇸</p>
-            <span className="text-[11px] text-amber-600 font-bold">Unverified Backpacker</span>
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          {allUsers.map((u) => {
+            const isSelected = currentUser.id === u.id;
+            return (
+              <button
+                key={u.id}
+                onClick={() => switchPersona(u.id)}
+                className={`p-3 rounded-2xl border text-left transition-all ${
+                  isSelected
+                    ? 'border-[#E64A2A] bg-[#E64A2A]/5 text-[#1A1918] font-semibold shadow-2xs'
+                    : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:border-[#D1CDC7]'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold text-[#1A1918] flex items-center gap-1.5">
+                    <span>{u.display_name}</span>
+                    <span>{u.origin_flag}</span>
+                  </p>
+                  <span className="text-[10px] font-mono-code font-semibold px-2 py-0.5 rounded-full bg-white border border-[#EAE7E2] text-[#6B6966]">
+                    {u.gender === 'female' ? '♀ Female' : '♂ Male'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span
+                    className={`text-[11px] font-medium ${
+                      u.is_verified ? 'text-[#059669]' : 'text-[#D97706]'
+                    }`}
+                  >
+                    {u.is_verified ? '✓ Verified KYC · Active' : '● Unverified Backpacker'}
+                  </span>
+                  {isSelected && (
+                    <span className="text-[10px] bg-[#E64A2A] text-white px-2 py-0.2 rounded-full font-semibold">
+                      Current
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Safety & Charter Review */}
-      <div className="bg-white border-2 border-slate-100 rounded-[32px] p-6 sm:p-7 shadow-sm space-y-4">
+      <div className="bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-extrabold text-base text-slate-900">Safety & Trust Shield</h3>
+          <h3 className="font-semibold text-sm text-[#1A1918]">Safety & Trust Shield</h3>
           {mutedUserIds.length > 0 && (
-            <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+            <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#FDF2F2] text-[#DC2626] border border-[#F87171]">
               {mutedUserIds.length} Muted Users
             </span>
           )}
         </div>
 
-        <p className="text-xs text-slate-500 leading-relaxed">
+        <p className="text-xs text-[#6B6966] leading-relaxed">
           Zero tolerance for dating behavior, unsolicited private messages, or commercial promotion.
         </p>
 
         <div className="flex items-center gap-2 pt-1">
           <button
             onClick={() => setIsCodeOfConductOpen(true)}
-            className="w-full py-3 px-4 rounded-2xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-xs font-bold text-indigo-700 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-full bg-[#F9F8F6] hover:bg-[#EAE7E2] border border-[#EAE7E2] text-xs font-semibold text-[#1A1918] transition-colors flex items-center justify-center gap-2"
           >
-            <ShieldCheck className="w-4 h-4 text-indigo-600" />
+            <ShieldCheck className="w-4 h-4 text-[#059669]" />
             <span>Review Platonic Non-Dating Charter</span>
           </button>
         </div>

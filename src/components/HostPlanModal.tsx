@@ -5,12 +5,7 @@ import {
   MapPin,
   Clock,
   Users,
-  ShieldCheck,
   Search,
-  Check,
-  Calendar,
-  AlertCircle,
-  Sparkles,
 } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 import { PlanCategory, CommercialVenue } from '../types';
@@ -22,8 +17,6 @@ export const HostPlanModal: React.FC = () => {
     setIsHostModalOpen,
     activeCityCode,
     currentUser,
-    currentTrip,
-    isTripActive,
     createPlan,
     startVerificationFlow,
     setActiveTab,
@@ -150,17 +143,20 @@ export const HostPlanModal: React.FC = () => {
   };
 
   return (
-    <div id="host-plan-modal-overlay" className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-100 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[92vh] text-slate-900 animate-in fade-in zoom-in-95 duration-150">
+    <div
+      id="host-plan-modal-overlay"
+      className="fixed inset-0 z-60 bg-[#1A1918]/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <div className="bg-white border border-[#EAE7E2] rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[92vh] text-[#1A1918] animate-in zoom-in-95 duration-150">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAE7E2]">
           <div>
-            <h2 className="text-lg font-extrabold text-slate-900">Host a Micro-Plan in {city.name}</h2>
-            <p className="text-xs text-slate-500 mt-0.5">2–4 hours · Max 4 people · Public venues only</p>
+            <h2 className="font-editorial text-xl font-semibold text-[#1A1918]">Host a Micro-Plan in {city.name}</h2>
+            <p className="text-xs text-[#6B6966] mt-0.5">2–4 hours · Max 4 people · Public commercial venues only</p>
           </div>
           <button
             onClick={() => setIsHostModalOpen(false)}
-            className="p-2 text-slate-400 hover:text-slate-900 rounded-xl transition-colors"
+            className="p-1.5 text-[#9C9892] hover:text-[#1A1918] rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -170,7 +166,7 @@ export const HostPlanModal: React.FC = () => {
         <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-4 text-left">
           {/* Field 1: Category */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700">Category</label>
+            <label className="text-xs font-semibold text-[#1A1918]">Category</label>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-xs">
               {(['dining', 'cafe_cowork', 'cultural_sight', 'outdoor_walk', 'nightlife'] as PlanCategory[]).map(
                 (cat) => (
@@ -178,10 +174,10 @@ export const HostPlanModal: React.FC = () => {
                     key={cat}
                     type="button"
                     onClick={() => setCategory(cat)}
-                    className={`py-2.5 px-2 rounded-xl border text-center transition-all capitalize font-bold ${
+                    className={`py-2 px-2 rounded-xl border text-center transition-all capitalize font-semibold ${
                       category === cat
-                        ? 'border-2 border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm'
-                        : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                        ? 'border-[#1A1918] bg-[#1A1918] text-white shadow-2xs'
+                        : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:bg-[#EAE7E2]/50'
                     }`}
                   >
                     {cat === 'dining'
@@ -202,8 +198,8 @@ export const HostPlanModal: React.FC = () => {
           {/* Field 2: Title (max 60 chars) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-bold text-slate-700">Plan Title</label>
-              <span className={`text-[11px] font-medium ${title.length > 55 ? 'text-amber-600' : 'text-slate-400'}`}>
+              <label className="font-semibold text-[#1A1918]">Plan Title</label>
+              <span className={`text-[11px] font-mono-code ${title.length > 55 ? 'text-[#DC2626]' : 'text-[#9C9892]'}`}>
                 {title.length}/60
               </span>
             </div>
@@ -214,15 +210,15 @@ export const HostPlanModal: React.FC = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Sunset drinks at Miradouro de Santa Catarina"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 focus:bg-white placeholder:text-slate-400"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white placeholder:text-[#9C9892]"
             />
           </div>
 
           {/* Field 3: Description (max 300 chars) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-bold text-slate-700">Description</label>
-              <span className={`text-[11px] font-medium ${description.length > 280 ? 'text-amber-600' : 'text-slate-400'}`}>
+              <label className="font-semibold text-[#1A1918]">Description</label>
+              <span className={`text-[11px] font-mono-code ${description.length > 280 ? 'text-[#DC2626]' : 'text-[#9C9892]'}`}>
                 {description.length}/300
               </span>
             </div>
@@ -233,41 +229,41 @@ export const HostPlanModal: React.FC = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What will you do? Where exactly will you meet? Keep it low-commitment and fun."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 focus:bg-white placeholder:text-slate-400 resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white placeholder:text-[#9C9892] resize-none"
             />
           </div>
 
           {/* Field 4 & 5: Date, Time & Duration */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700">Date (Within 7 Days)</label>
+              <label className="text-xs font-semibold text-[#1A1918]">Date (Within 7 Days)</label>
               <input
                 id="input-plan-date"
                 type="date"
                 value={planDate}
                 onChange={(e) => setPlanDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 focus:bg-white"
+                className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700">Start Time</label>
+              <label className="text-xs font-semibold text-[#1A1918]">Start Time</label>
               <input
                 id="input-plan-time"
                 type="time"
                 value={planTime}
                 onChange={(e) => setPlanTime(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 focus:bg-white"
+                className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700">Duration (Max 4h)</label>
+              <label className="text-xs font-semibold text-[#1A1918]">Duration (Max 4h)</label>
               <select
                 id="select-plan-duration"
                 value={durationHours}
                 onChange={(e) => setDurationHours(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 focus:bg-white cursor-pointer"
+                className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white cursor-pointer"
               >
                 <option value={1.5}>1.5 Hours</option>
                 <option value={2}>2.0 Hours</option>
@@ -280,25 +276,25 @@ export const HostPlanModal: React.FC = () => {
           {/* Field 6: Venue Location (Google Places commercial venues only) */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-bold text-slate-700">
+              <label className="font-semibold text-[#1A1918]">
                 Commercial Venue (Google Places Verified)
               </label>
-              <span className="text-[11px] text-indigo-600 font-bold">Public places only</span>
+              <span className="text-[11px] text-[#059669] font-medium">Public places only</span>
             </div>
 
             {selectedVenue ? (
-              <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-start justify-between gap-2">
+              <div className="p-3.5 rounded-2xl bg-[#F9F8F6] border border-[#EAE7E2] flex items-start justify-between gap-2">
                 <div className="space-y-0.5">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900">
-                    <MapPin className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1A1918]">
+                    <MapPin className="w-3.5 h-3.5 text-[#E64A2A] shrink-0" />
                     <span>{selectedVenue.name}</span>
                   </div>
-                  <p className="text-[11px] text-slate-500">{selectedVenue.address}</p>
+                  <p className="text-[11px] text-[#6B6966]">{selectedVenue.address}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedVenue(null)}
-                  className="text-xs text-indigo-600 font-bold hover:text-indigo-800 p-1"
+                  className="text-xs text-[#E64A2A] font-semibold hover:underline p-1"
                 >
                   Change
                 </button>
@@ -306,29 +302,29 @@ export const HostPlanModal: React.FC = () => {
             ) : (
               <div className="space-y-2">
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-[#9C9892] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={venueSearchQuery}
                     onChange={(e) => setVenueSearchQuery(e.target.value)}
                     placeholder={`Search verified establishments in ${city.name}...`}
-                    className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-indigo-500 focus:bg-white placeholder:text-slate-400"
+                    className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white placeholder:text-[#9C9892]"
                   />
                 </div>
 
                 {/* Venues suggestions list */}
-                <div className="max-h-32 overflow-y-auto space-y-1 rounded-2xl border border-slate-200 bg-slate-50 p-1 text-xs">
+                <div className="max-h-32 overflow-y-auto space-y-1 rounded-2xl border border-[#EAE7E2] bg-[#F9F8F6] p-1 text-xs">
                   {searchedVenues.map((v) => (
                     <button
                       key={v.place_id}
                       type="button"
                       onClick={() => setSelectedVenue(v)}
-                      className="w-full text-left p-2.5 rounded-xl hover:bg-white hover:shadow-xs transition-all flex items-start gap-2 text-slate-700"
+                      className="w-full text-left p-2.5 rounded-xl hover:bg-white hover:shadow-2xs transition-all flex items-start gap-2 text-[#6B6966]"
                     >
-                      <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
+                      <MapPin className="w-3.5 h-3.5 text-[#E64A2A] shrink-0 mt-0.5" />
                       <div className="truncate">
-                        <p className="font-bold text-slate-900 truncate">{v.name}</p>
-                        <p className="text-[10px] text-slate-500 truncate">{v.address}</p>
+                        <p className="font-semibold text-[#1A1918] truncate">{v.name}</p>
+                        <p className="text-[10px] text-[#9C9892] truncate">{v.address}</p>
                       </div>
                     </button>
                   ))}
@@ -340,8 +336,8 @@ export const HostPlanModal: React.FC = () => {
           {/* Field 7: Group Size (2 to 4 people) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-bold text-slate-700">Max Group Size (Including Host)</label>
-              <span className="text-[11px] text-slate-400">2 to 4 travelers max</span>
+              <label className="font-semibold text-[#1A1918]">Max Group Size (Including Host)</label>
+              <span className="text-[11px] text-[#9C9892]">2 to 4 travelers max</span>
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               {[2, 3, 4].map((size) => (
@@ -349,10 +345,10 @@ export const HostPlanModal: React.FC = () => {
                   key={size}
                   type="button"
                   onClick={() => setMaxParticipants(size)}
-                  className={`py-2.5 rounded-xl border text-center transition-all ${
+                  className={`py-2.5 rounded-xl border text-center transition-all font-semibold ${
                     maxParticipants === size
-                      ? 'border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold shadow-sm'
-                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 font-medium'
+                      ? 'border-[#1A1918] bg-[#1A1918] text-white shadow-2xs'
+                      : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:bg-[#EAE7E2]/50'
                   }`}
                 >
                   {size} People {size === 4 && '(Max)'}
@@ -362,15 +358,15 @@ export const HostPlanModal: React.FC = () => {
           </div>
 
           {/* Field 8: Safety Toggle (Female-Only) */}
-          <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-[#F9F8F6] border border-[#EAE7E2] flex items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1A1918]">
                 <span>Make this a Female-Only Plan</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200 font-bold">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] font-semibold">
                   ♀ Protected
                 </span>
               </div>
-              <p className="text-[11px] text-purple-700 leading-relaxed">
+              <p className="text-[11px] text-[#6B6966] leading-relaxed">
                 Only verified female-identifying travelers can see or request to join.
               </p>
             </div>
@@ -384,17 +380,17 @@ export const HostPlanModal: React.FC = () => {
                   onChange={(e) => setFemaleOnly(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                <div className="w-11 h-6 bg-[#EAE7E2] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#059669]"></div>
               </label>
             ) : (
-              <span className="text-[10px] text-slate-400 font-bold px-2 py-1 rounded-md bg-white border border-slate-200">
+              <span className="text-[10px] text-[#9C9892] font-semibold px-2 py-1 rounded-md bg-white border border-[#EAE7E2]">
                 Disabled for male hosts
               </span>
             )}
           </div>
 
           {formError && (
-            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3.5 text-xs text-rose-800 font-medium">
+            <div className="bg-[#FDF2F2] border border-[#F87171] rounded-2xl p-3.5 text-xs text-[#DC2626] font-medium">
               {formError}
             </div>
           )}
@@ -404,7 +400,7 @@ export const HostPlanModal: React.FC = () => {
             <button
               id="btn-publish-micro-plan"
               type="submit"
-              className="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 active:scale-[0.99] transition-all"
+              className="w-full py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-[#E64A2A]/20 active:scale-[0.99] transition-all"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Publish Plan</span>
