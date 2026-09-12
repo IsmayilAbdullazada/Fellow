@@ -192,20 +192,40 @@ export const Navigation: React.FC = () => {
           </div>
 
           {/* Active Hub Banner */}
-          <div className="mt-2.5 flex items-center justify-between gap-2 px-3.5 py-2 rounded-full bg-white/80 border border-[#EAE7E2] shadow-2xs text-xs text-[#6B6966]">
-            <div className="flex items-center gap-2 truncate">
-              <span className="text-sm shrink-0">📍</span>
-              <span className="truncate">
-                Showing <strong className="text-[#1A1918] font-semibold">{plans.filter(p => p.city_code === activeCityCode && p.status !== 'cancelled').length} active micro-plans</strong> in {cityInfo.name} for current window
-              </span>
-            </div>
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-[#E64A2A] hover:underline shrink-0"
-            >
-              <span>{isTripActive ? `${tripDaysRemaining} days remaining` : 'Declare trip dates'}</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
+          <div className="mt-2.5 flex items-center justify-between gap-2 px-3.5 py-2 rounded-full bg-white/90 border border-[#EAE7E2] shadow-2xs text-xs text-[#6B6966]">
+            {activeTab === 'landing' ? (
+              <>
+                <div className="flex items-center gap-2 truncate">
+                  <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse shrink-0" />
+                  <span className="truncate">
+                    <strong className="text-[#1A1918] font-semibold">Autumn Cohorts Active:</strong> Tokyo (Shibuya, Ginza) & Lisbon (Chiado, Alfama)
+                  </span>
+                </div>
+                <button
+                  onClick={() => setActiveTab('discover')}
+                  className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-[#E64A2A] hover:underline shrink-0 cursor-pointer"
+                >
+                  <span>Explore Tables</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 truncate">
+                  <span className="text-sm shrink-0">📍</span>
+                  <span className="truncate">
+                    Active Hub: <strong className="text-[#1A1918] font-semibold">{cityInfo.name}</strong> ({cityInfo.flag}) · Verified solo cohort in town
+                  </span>
+                </div>
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-[#E64A2A] hover:underline shrink-0 cursor-pointer"
+                >
+                  <span>{isTripActive ? `${tripDaysRemaining}d remaining` : 'Declare trip dates'}</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>

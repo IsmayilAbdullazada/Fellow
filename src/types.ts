@@ -71,6 +71,7 @@ export interface MicroPlan {
   end_time: string; // ISO string <= start_time + 4 hours
   max_participants: number; // 2 - 4
   female_only: boolean;
+  photo_url?: string;
   status: PlanStatus;
   qr_checkin_token: string;
   created_at: string;

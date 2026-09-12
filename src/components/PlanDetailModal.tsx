@@ -54,17 +54,15 @@ export const PlanDetailModal: React.FC<PlanDetailModalProps> = ({ planId, onClos
 
   const handleJoinClick = () => {
     setRequestError(null);
-    if (!currentUser.is_verified || !currentUser.has_paid_pass) {
-      startVerificationFlow();
-      return;
-    }
-
     setIsRequesting(true);
     const result = requestToJoinPlan(plan.id);
     setIsRequesting(false);
 
-    if (!result.success) {
-      setRequestError(result.error || 'Failed to request plan.');
+    if (!result.success && result.error) {
+      // If it's a hard error (e.g. plan full or overlap), show in card
+      if (result.error.toLowerCase().includes('full') || result.error.toLowerCase().includes('already')) {
+        setRequestError(result.error);
+      }
     }
   };
 

@@ -294,56 +294,87 @@ export const DiscoveryFeed: React.FC = () => {
                 key={plan.id}
                 id={`micro-plan-card-${plan.id}`}
                 onClick={() => setSelectedPlanId(plan.id)}
-                className="group relative bg-white border border-[#EAE7E2] rounded-2xl p-5 shadow-bento flex flex-col justify-between hover:border-[#D1CDC7] transition-all duration-200 cursor-pointer text-left active:scale-[0.985]"
+                className="group relative bg-white border border-[#EAE7E2] rounded-2xl overflow-hidden shadow-bento flex flex-col justify-between hover:border-[#1A1918] transition-all duration-200 cursor-pointer text-left active:scale-[0.985]"
               >
                 <div>
-                  {/* Top: Category Pill + Spots Left with Dots (●●○○) */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2.5 py-1 rounded-md bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918]">
-                        {getCategoryLabel(plan.category)}
-                      </span>
-                      {plan.female_only && (
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2 py-1 rounded-md bg-[#FDF2F4] border border-[#FBCFE8] text-[#9D174D]">
-                          ♀ Female Only
+                  {/* Photo Header if available */}
+                  {plan.photo_url && (
+                    <div className="relative h-40 w-full overflow-hidden bg-[#EAE7E2]">
+                      <img
+                        src={plan.photo_url}
+                        alt={plan.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/95 backdrop-blur-sm text-[#1A1918] shadow-2xs">
+                          {getCategoryLabel(plan.category)}
                         </span>
-                      )}
+                        {plan.female_only && (
+                          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#FDF2F4]/95 backdrop-blur-sm border border-[#FBCFE8] text-[#9D174D] shadow-2xs">
+                            ♀ Female Only
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute bottom-2.5 right-3">
+                        <span className="bg-[#E64A2A] text-white px-2 py-0.5 rounded-full font-bold text-[11px] shadow-sm">
+                          {spotsRemaining} spot{spotsRemaining > 1 ? 's' : ''} left
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-5">
+                    {/* If no photo, show standard category pill row */}
+                    {!plan.photo_url && (
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2.5 py-1 rounded-md bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918]">
+                            {getCategoryLabel(plan.category)}
+                          </span>
+                          {plan.female_only && (
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2 py-1 rounded-md bg-[#FDF2F4] border border-[#FBCFE8] text-[#9D174D]">
+                              ♀ Female Only
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Spots Left indicator with dots: [Spots Left: 2 of 4] ●●○○ */}
+                        <div className="flex items-center gap-1.5 text-xs text-[#6B6966] font-medium">
+                          <span>Spots: {spotsRemaining} of {plan.max_participants}</span>
+                          <span className="font-mono-code text-sm tracking-tight text-[#E64A2A] font-bold">
+                            {dots.join('')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Title (Editorial Serif font, 20pt, bold, high contrast) */}
+                    <h3 className="font-editorial text-[20px] leading-[26px] font-semibold text-[#1A1918] mb-3 group-hover:text-[#E64A2A] transition-colors">
+                      {plan.title}
+                    </h3>
+
+                    {/* Bento Box: Venue & Timing Box */}
+                    <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-3 space-y-1.5 text-xs text-[#6B6966]">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-[#1A1918] shrink-0" />
+                        <span className="font-medium text-[#1A1918]">
+                          {formatPlanDateTime(plan.start_time, plan.end_time)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-[#6B6966] shrink-0" />
+                        <span className="truncate text-[#6B6966]">
+                          {plan.venue_name} · {plan.venue_address}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Spots Left indicator with dots: [Spots Left: 2 of 4] ●●○○ */}
-                    <div className="flex items-center gap-1.5 text-xs text-[#6B6966] font-medium">
-                      <span>Spots: {spotsRemaining} of {plan.max_participants}</span>
-                      <span className="font-mono-code text-sm tracking-tight text-[#E64A2A] font-bold">
-                        {dots.join('')}
-                      </span>
-                    </div>
+                    {/* Plan excerpt */}
+                    <p className="text-xs text-[#6B6966] leading-relaxed mt-3 line-clamp-2">
+                      {plan.description}
+                    </p>
                   </div>
-
-                  {/* Title (Editorial Serif font, 20pt, bold, high contrast) */}
-                  <h3 className="font-editorial text-[20px] leading-[26px] font-semibold text-[#1A1918] mb-3 group-hover:text-[#E64A2A] transition-colors">
-                    {plan.title}
-                  </h3>
-
-                  {/* Bento Box: Venue & Timing Box */}
-                  <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-3 space-y-1.5 text-xs text-[#6B6966]">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5 text-[#1A1918] shrink-0" />
-                      <span className="font-medium text-[#1A1918]">
-                        {formatPlanDateTime(plan.start_time, plan.end_time)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-[#6B6966] shrink-0" />
-                      <span className="truncate text-[#6B6966]">
-                        {plan.venue_name} · {plan.venue_address}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Plan excerpt */}
-                  <p className="text-xs text-[#6B6966] leading-relaxed mt-3 line-clamp-2">
-                    {plan.description}
-                  </p>
                 </div>
 
                 {/* Hairline Divider + Host Avatar with Verified Shield */}

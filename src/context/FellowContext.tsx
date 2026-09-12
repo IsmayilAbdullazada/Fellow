@@ -386,6 +386,20 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       spread: 60,
       origin: { y: 0.6 },
     });
+
+    if (pendingAction) {
+      if (pendingAction.type === 'host_plan') {
+        setTimeout(() => {
+          setIsHostModalOpen(true);
+        }, 500);
+      } else if (pendingAction.type === 'join_plan') {
+        const targetPlanId = pendingAction.planId;
+        setTimeout(() => {
+          setSelectedPlanId(targetPlanId);
+        }, 500);
+      }
+      setPendingAction(null);
+    }
   };
 
   // Create Micro-Plan
