@@ -21,16 +21,6 @@ export const CITY_HUBS: Record<string, CityHubInfo> = {
     lng: -9.1393,
     is_live: true,
   },
-  DPS_ID: {
-    code: 'DPS_ID',
-    name: 'Bali (Canggu)',
-    country: 'Indonesia',
-    flag: '🇮🇩',
-    tagline: 'Coastal roasters, rice paddy walks & sunset coconut catchups',
-    lat: -8.6478,
-    lng: 115.1385,
-    is_live: true,
-  },
 };
 
 export const WAITLIST_CITIES: WaitlistRegion[] = [
@@ -337,14 +327,15 @@ export const INITIAL_TRIPS: Trip[] = [
 ];
 
 // Reference anchor micro-plans strictly implementing PRD section 6.2 and specifications
-const getFutureTime = (hoursFromNow: number): string => {
+const getScheduledTime = (dayOffset: number, hour: number, minute: number = 0): string => {
   const d = new Date();
-  d.setHours(d.getHours() + hoursFromNow);
+  d.setDate(d.getDate() + dayOffset);
+  d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 };
 
 export const INITIAL_PLANS: MicroPlan[] = [
-  // Tokyo Plan 1: Tonight Shinjuku Yakitori Crawl
+  // Tokyo Plan 1: Tonight Shinjuku Yakitori Crawl at 7:30 PM
   {
     id: 'plan_tokyo_shinjuku',
     host_user_id: 'user_kenji_t',
@@ -357,8 +348,8 @@ export const INITIAL_PLANS: MicroPlan[] = [
     venue_lat: 35.6932,
     venue_lng: 139.6997,
     venue_place_id: 'tokyo_omoide_yokocho',
-    start_time: getFutureTime(3), // Tonight in 3 hours
-    end_time: getFutureTime(5.5), // 2.5 hours
+    start_time: getScheduledTime(0, 19, 30), // Tonight at 7:30 PM
+    end_time: getScheduledTime(0, 22, 0), // 2.5 hours
     max_participants: 4,
     female_only: false,
     photo_url: 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1000&q=80',
@@ -367,7 +358,7 @@ export const INITIAL_PLANS: MicroPlan[] = [
     created_at: '2026-09-08T10:00:00Z',
   },
 
-  // Tokyo Plan 2: Tomorrow Ginza Standing Sushi (Female Only)
+  // Tokyo Plan 2: Tomorrow Ginza Standing Sushi at 12:30 PM (Female Only)
   {
     id: 'plan_tokyo_ginza_sushi',
     host_user_id: 'user_elena_r',
@@ -380,8 +371,8 @@ export const INITIAL_PLANS: MicroPlan[] = [
     venue_lat: 35.6723,
     venue_lng: 139.7675,
     venue_place_id: 'tokyo_uogashi_nihonichi',
-    start_time: getFutureTime(22), // Tomorrow lunchtime
-    end_time: getFutureTime(24),
+    start_time: getScheduledTime(1, 12, 30), // Tomorrow lunchtime 12:30 PM
+    end_time: getScheduledTime(1, 14, 0),
     max_participants: 3,
     female_only: true, // Female-only test plan!
     photo_url: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1000&q=80',
@@ -390,7 +381,7 @@ export const INITIAL_PLANS: MicroPlan[] = [
     created_at: '2026-09-08T11:30:00Z',
   },
 
-  // Tokyo Plan 3: Saturday Morning Meiji Shrine Walk & Coffee
+  // Tokyo Plan 3: Saturday Morning Meiji Shrine Walk & Coffee at 9:30 AM
   {
     id: 'plan_tokyo_meiji_coffee',
     host_user_id: 'user_kenji_t',
@@ -403,8 +394,8 @@ export const INITIAL_PLANS: MicroPlan[] = [
     venue_lat: 35.6764,
     venue_lng: 139.6993,
     venue_place_id: 'tokyo_meiji_jingu',
-    start_time: getFutureTime(46), // within 48h (chat unlocked!)
-    end_time: getFutureTime(49),
+    start_time: getScheduledTime(2, 9, 30), // 9:30 AM morning!
+    end_time: getScheduledTime(2, 12, 30),
     max_participants: 4,
     female_only: false,
     photo_url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80',
@@ -413,7 +404,7 @@ export const INITIAL_PLANS: MicroPlan[] = [
     created_at: '2026-09-07T14:00:00Z',
   },
 
-  // Lisbon Plan 1: Sunset Drinks at Miradouro de Santa Catarina
+  // Lisbon Plan 1: Sunset Drinks at Miradouro de Santa Catarina at 6:30 PM
   {
     id: 'plan_lisbon_sunset',
     host_user_id: 'user_sofia_a',
@@ -426,8 +417,8 @@ export const INITIAL_PLANS: MicroPlan[] = [
     venue_lat: 38.7107,
     venue_lng: -9.1481,
     venue_place_id: 'lisbon_miradouro_santa_catarina',
-    start_time: getFutureTime(4),
-    end_time: getFutureTime(6.5),
+    start_time: getScheduledTime(0, 18, 30), // Today 6:30 PM
+    end_time: getScheduledTime(0, 21, 0),
     max_participants: 4,
     female_only: false,
     photo_url: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=1000&q=80',
@@ -436,7 +427,7 @@ export const INITIAL_PLANS: MicroPlan[] = [
     created_at: '2026-09-08T09:00:00Z',
   },
 
-  // Lisbon Plan 2: Coworking & Lunch at Time Out Market
+  // Lisbon Plan 2: Coworking & Lunch at Time Out Market at 11:30 AM
   {
     id: 'plan_lisbon_timeout_cowork',
     host_user_id: 'user_chloe_d',
@@ -449,56 +440,14 @@ export const INITIAL_PLANS: MicroPlan[] = [
     venue_lat: 38.7071,
     venue_lng: -9.1466,
     venue_place_id: 'lisbon_timeout_market',
-    start_time: getFutureTime(26),
-    end_time: getFutureTime(30),
+    start_time: getScheduledTime(1, 11, 30), // Tomorrow 11:30 AM
+    end_time: getScheduledTime(1, 15, 0),
     max_participants: 4,
     female_only: true,
     photo_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80',
     status: 'open',
     qr_checkin_token: 'FELLOW_LIS_TIMEOUT_TOKEN_5519',
     created_at: '2026-09-08T12:00:00Z',
-  },
-  // Bali Plan 1: Sunset coconuts at Canggu
-  {
-    id: 'plan_bali_canggu_sunset',
-    host_user_id: 'user_elena_r',
-    city_code: 'DPS_ID',
-    category: 'outdoor_walk',
-    title: 'Echo Beach Sunset Coconuts & Lawn Catchup',
-    description: 'Meeting at The Lawn front deck for fresh young coconuts, sea breeze, and golden hour conversation. Relaxed solo traveler circle, max 4.',
-    venue_name: 'The Lawn Beachside Lounge',
-    venue_address: 'Jl. Pura Dalem, Canggu, Bali 80361',
-    venue_lat: -8.6578,
-    venue_lng: 115.1305,
-    venue_place_id: 'bali_the_lawn',
-    start_time: getFutureTime(4),
-    end_time: getFutureTime(7),
-    max_participants: 4,
-    female_only: false,
-    status: 'open',
-    qr_checkin_token: 'FELLOW_BALI_SUNSET_TOKEN_1029',
-    created_at: '2026-09-08T13:00:00Z',
-  },
-  // Bali Plan 2: Morning breakfast & coffee at Crate
-  {
-    id: 'plan_bali_crate_coffee',
-    host_user_id: 'user_chloe_d',
-    city_code: 'DPS_ID',
-    category: 'cafe_cowork',
-    title: 'Morning Cold Brews & Acai at Crate',
-    description: 'Casual morning breakfast and sharing travel tips before the midday heat. Great gallery vibes and chill acoustics.',
-    venue_name: 'Crate Cafe Canggu',
-    venue_address: 'Jl. Canggu Padang Linjong No.49F, Canggu, Bali 80351',
-    venue_lat: -8.6478,
-    venue_lng: 115.1385,
-    venue_place_id: 'bali_crate_cafe',
-    start_time: getFutureTime(14),
-    end_time: getFutureTime(16),
-    max_participants: 4,
-    female_only: false,
-    status: 'open',
-    qr_checkin_token: 'FELLOW_BALI_CRATE_TOKEN_8821',
-    created_at: '2026-09-08T14:00:00Z',
   },
 ];
 
@@ -588,29 +537,6 @@ export const INITIAL_PARTICIPANTS = [
     deposit_status: 'released' as const,
     checked_in_at: null,
     created_at: '2026-09-08T12:00:00Z',
-  },
-  // Bali Plans
-  {
-    id: 'part_8',
-    plan_id: 'plan_bali_canggu_sunset',
-    user_id: 'user_elena_r',
-    role: 'host' as const,
-    rsvp_status: 'confirmed' as const,
-    deposit_payment_intent_id: 'pi_host_exempt_006',
-    deposit_status: 'released' as const,
-    checked_in_at: null,
-    created_at: '2026-09-08T13:00:00Z',
-  },
-  {
-    id: 'part_9',
-    plan_id: 'plan_bali_crate_coffee',
-    user_id: 'user_chloe_d',
-    role: 'host' as const,
-    rsvp_status: 'confirmed' as const,
-    deposit_payment_intent_id: 'pi_host_exempt_007',
-    deposit_status: 'released' as const,
-    checked_in_at: null,
-    created_at: '2026-09-08T14:00:00Z',
   },
 ];
 

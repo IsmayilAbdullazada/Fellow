@@ -30,11 +30,17 @@ export const MyPlansView: React.FC = () => {
     setActiveChatPlanId,
     setIsHostModalOpen,
     setSelectedPlanId,
+    myPlansSubTab,
+    setMyPlansSubTab,
   } = useFellow();
 
-  const [activeSubTab, setActiveSubTab] = useState<'attending' | 'hosting'>('attending');
   const [activeQrModal, setActiveQrModal] = useState<{ plan: MicroPlan; mode: 'host_present' | 'guest_scan' } | null>(null);
   const [cancelModalPlanId, setCancelModalPlanId] = useState<string | null>(null);
+  const [cancelResultFeedback, setCancelResultFeedback] = useState<{
+    released: boolean;
+    feeCharged: boolean;
+    penaltyApplied: boolean;
+  } | null>(null);
 
   // Plans where current user is host
   const hostedPlans = plans.filter((p) => p.host_user_id === currentUser.id && p.status !== 'cancelled');
@@ -47,8 +53,13 @@ export const MyPlansView: React.FC = () => {
   const attendingPlans = plans.filter((p) => attendingPlanIds.includes(p.id) && p.status !== 'cancelled');
 
   const handleCancelAttendanceClick = (planId: string) => {
-    cancelAttendance(planId);
+    const result = cancelAttendance(planId);
+    setCancelResultFeedback(result);
+  };
+
+  const handleCloseCancelModal = () => {
     setCancelModalPlanId(null);
+    setCancelResultFeedback(null);
   };
 
   const calculateHoursToStart = (startTimeStr: string) => {
@@ -63,9 +74,9 @@ export const MyPlansView: React.FC = () => {
       <div className="flex rounded-full bg-white p-1 border border-[#EAE7E2] text-xs font-semibold shadow-2xs">
         <button
           id="tab-sub-attending"
-          onClick={() => setActiveSubTab('attending')}
+          onClick={() => setMyPlansSubTab('attending')}
           className={`flex-1 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 ${
-            activeSubTab === 'attending'
+            myPlansSubTab === 'attending'
               ? 'bg-[#1A1918] text-white shadow-sm'
               : 'text-[#6B6966] hover:text-[#1A1918]'
           }`}
@@ -74,7 +85,7 @@ export const MyPlansView: React.FC = () => {
           {attendingPlans.length > 0 && (
             <span
               className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                activeSubTab === 'attending' ? 'bg-[#33312E] text-white' : 'bg-[#F9F8F6] text-[#1A1918]'
+                myPlansSubTab === 'attending' ? 'bg-[#33312E] text-white' : 'bg-[#F9F8F6] text-[#1A1918]'
               }`}
             >
               {attendingPlans.length}
@@ -83,9 +94,9 @@ export const MyPlansView: React.FC = () => {
         </button>
         <button
           id="tab-sub-hosting"
-          onClick={() => setActiveSubTab('hosting')}
+          onClick={() => setMyPlansSubTab('hosting')}
           className={`flex-1 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 ${
-            activeSubTab === 'hosting'
+            myPlansSubTab === 'hosting'
               ? 'bg-[#1A1918] text-white shadow-sm'
               : 'text-[#6B6966] hover:text-[#1A1918]'
           }`}
@@ -94,7 +105,7 @@ export const MyPlansView: React.FC = () => {
           {hostedPlans.length > 0 && (
             <span
               className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                activeSubTab === 'hosting' ? 'bg-[#33312E] text-white' : 'bg-[#F9F8F6] text-[#1A1918]'
+                myPlansSubTab === 'hosting' ? 'bg-[#33312E] text-white' : 'bg-[#F9F8F6] text-[#1A1918]'
               }`}
             >
               {hostedPlans.length}
@@ -104,7 +115,7 @@ export const MyPlansView: React.FC = () => {
       </div>
 
       {/* Attending SubTab */}
-      {activeSubTab === 'attending' && (
+      {myPlansSubTab === 'attending' && (
         <div className="space-y-4">
           {attendingPlans.length > 0 ? (
             attendingPlans.map((plan) => {
@@ -225,7 +236,7 @@ export const MyPlansView: React.FC = () => {
       )}
 
       {/* Hosting SubTab */}
-      {activeSubTab === 'hosting' && (
+      {myPlansSubTab === 'hosting' && (
         <div className="space-y-4">
           {hostedPlans.length > 0 ? (
             hostedPlans.map((plan) => {
@@ -354,10 +365,10 @@ export const MyPlansView: React.FC = () => {
                     <button
                       id={`btn-host-open-qr-${plan.id}`}
                       onClick={() => setActiveQrModal({ plan, mode: 'host_present' })}
-                      className="flex-1 py-2.5 px-4 rounded-full bg-[#1A1918] hover:bg-[#2E2C29] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-2xs active:scale-[0.99] transition-all"
+                      className="flex-1 py-2.5 px-4 rounded-full bg-[#1A1918] hover:bg-[#2E2C29] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-2xs active:scale-[0.99] transition-all cursor-pointer"
                     >
                       <QrCode className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span>Open Attendance HUD & QR</span>
+                      <span>Open Check-In QR</span>
                     </button>
 
                     <button
@@ -413,55 +424,114 @@ export const MyPlansView: React.FC = () => {
       {cancelModalPlanId && (
         <div className="fixed inset-0 z-60 bg-[#1A1918]/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white border border-[#EAE7E2] rounded-3xl p-6 max-w-sm w-full space-y-4 text-[#1A1918] text-left shadow-2xl">
-            <h3 className="font-editorial text-xl font-semibold text-[#1A1918]">Cancel Attendance?</h3>
-
-            {(() => {
-              const targetPlan = plans.find((p) => p.id === cancelModalPlanId);
-              if (!targetPlan) return null;
-              const hours = calculateHoursToStart(targetPlan.start_time);
-              const isLate = hours < 12;
-
-              return (
-                <div className="space-y-3 text-xs">
-                  {isLate ? (
-                    <div className="bg-[#FDF2F2] border border-[#F87171] rounded-2xl p-4 text-[#DC2626] space-y-1">
-                      <p className="font-semibold flex items-center gap-1.5">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>Late Cancellation Notice ({hours.toFixed(1)} hrs left)</span>
-                      </p>
-                      <p className="leading-relaxed text-[11px] text-[#B91C1C]">
-                        Cancellations with less than 12 hours notice forfeit the $10 deposit ($5 to host credit, $5 platform) and decrement your reliability score by 25 points.
-                      </p>
-                    </div>
+            {cancelResultFeedback ? (
+              /* Financial Settlement Receipt */
+              <div className="space-y-4 text-center animate-in zoom-in-95">
+                <div
+                  className={`w-14 h-14 rounded-full mx-auto flex items-center justify-center border-2 ${
+                    cancelResultFeedback.released
+                      ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]'
+                      : 'bg-[#FEF2F2] text-[#DC2626] border-[#FCA5A5]'
+                  }`}
+                >
+                  {cancelResultFeedback.released ? (
+                    <CheckCircle className="w-7 h-7 stroke-[2.5]" />
                   ) : (
-                    <div className="bg-[#ECFDF5] border border-[#A7F3D0] rounded-2xl p-4 text-[#065F46] space-y-1">
-                      <p className="font-semibold flex items-center gap-1.5">
-                        <CheckCircle className="w-4 h-4 text-[#059669]" />
-                        <span>Timely Notice ({hours.toFixed(1)} hrs left)</span>
-                      </p>
-                      <p className="leading-relaxed text-[11px]">
-                        Notice is greater than 12 hours. Your $10 deposit authorization will be cancelled and released immediately ($0 cost).
-                      </p>
-                    </div>
+                    <AlertTriangle className="w-7 h-7 stroke-[2.5]" />
                   )}
+                </div>
 
-                  <div className="flex items-center gap-2 pt-2">
-                    <button
-                      onClick={() => setCancelModalPlanId(null)}
-                      className="flex-1 py-2.5 rounded-full bg-[#F9F8F6] hover:bg-[#EAE7E2] border border-[#EAE7E2] text-[#1A1918] font-semibold text-xs"
+                <div>
+                  <h3 className="font-editorial text-xl font-bold text-[#1A1918]">
+                    {cancelResultFeedback.released ? 'Deposit Authorization Voided' : 'Late Cancellation Recorded'}
+                  </h3>
+                  <p className="text-xs text-[#6B6966] mt-1 leading-relaxed">
+                    {cancelResultFeedback.released
+                      ? 'Because you cancelled with greater than 12 hours notice, your $10 seat hold has been completely voided at $0.00 charge. Your 100% reliability score is preserved.'
+                      : 'Because cancellation occurred with less than 12 hours notice, your $10 deposit was captured ($5 host credit / $5 platform) and 25 points were deducted from your reliability score.'}
+                  </p>
+                </div>
+
+                <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-2xl p-3.5 text-xs text-left space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#6B6966]">Card Authorization</span>
+                    <span className="font-mono-code font-bold text-[#1A1918]">
+                      {cancelResultFeedback.released ? 'VOIDED ($0.00)' : 'CHARGED ($10.00)'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#6B6966]">Reliability Status</span>
+                    <span
+                      className={`font-semibold ${
+                        cancelResultFeedback.released ? 'text-[#059669]' : 'text-[#DC2626]'
+                      }`}
                     >
-                      Keep Spot
-                    </button>
-                    <button
-                      onClick={() => handleCancelAttendanceClick(cancelModalPlanId)}
-                      className="flex-1 py-2.5 rounded-full bg-[#DC2626] hover:bg-[#B91C1C] text-white font-semibold text-xs shadow-sm"
-                    >
-                      Confirm Cancel
-                    </button>
+                      {cancelResultFeedback.released ? 'Intact (100%)' : '-25 Points Applied'}
+                    </span>
                   </div>
                 </div>
-              );
-            })()}
+
+                <button
+                  type="button"
+                  onClick={handleCloseCancelModal}
+                  className="w-full py-3 px-4 rounded-full bg-[#1A1918] hover:bg-[#2E2C29] text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                >
+                  Understood & Return to Plans
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="font-editorial text-xl font-semibold text-[#1A1918]">Cancel Attendance?</h3>
+
+                {(() => {
+                  const targetPlan = plans.find((p) => p.id === cancelModalPlanId);
+                  if (!targetPlan) return null;
+                  const hours = calculateHoursToStart(targetPlan.start_time);
+                  const isLate = hours < 12;
+
+                  return (
+                    <div className="space-y-3 text-xs">
+                      {isLate ? (
+                        <div className="bg-[#FDF2F2] border border-[#F87171] rounded-2xl p-4 text-[#DC2626] space-y-1">
+                          <p className="font-semibold flex items-center gap-1.5">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>Late Cancellation Notice ({hours.toFixed(1)} hrs left)</span>
+                          </p>
+                          <p className="leading-relaxed text-[11px] text-[#B91C1C]">
+                            Cancellations with less than 12 hours notice forfeit the $10 deposit ($5 to host credit, $5 platform) and decrement your reliability score by 25 points.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-[#ECFDF5] border border-[#A7F3D0] rounded-2xl p-4 text-[#065F46] space-y-1">
+                          <p className="font-semibold flex items-center gap-1.5">
+                            <CheckCircle className="w-4 h-4 text-[#059669]" />
+                            <span>Timely Notice ({hours.toFixed(1)} hrs left)</span>
+                          </p>
+                          <p className="leading-relaxed text-[11px]">
+                            Notice is greater than 12 hours. Your $10 deposit authorization will be cancelled and released immediately ($0 cost).
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 pt-2">
+                        <button
+                          onClick={handleCloseCancelModal}
+                          className="flex-1 py-2.5 rounded-full bg-[#F9F8F6] hover:bg-[#EAE7E2] border border-[#EAE7E2] text-[#1A1918] font-semibold text-xs cursor-pointer"
+                        >
+                          Keep Spot
+                        </button>
+                        <button
+                          onClick={() => handleCancelAttendanceClick(cancelModalPlanId)}
+                          className="flex-1 py-2.5 rounded-full bg-[#DC2626] hover:bg-[#B91C1C] text-white font-semibold text-xs shadow-sm cursor-pointer"
+                        >
+                          Confirm Cancel
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </>
+            )}
           </div>
         </div>
       )}

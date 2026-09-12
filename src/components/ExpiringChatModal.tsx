@@ -7,6 +7,7 @@ import {
   Lock,
   Info,
   MapPin,
+  ExternalLink,
 } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 
@@ -24,6 +25,7 @@ export const ExpiringChatModal: React.FC<ExpiringChatModalProps> = ({ planId, on
     currentUser,
     setReportingTarget,
     allUsers,
+    setSelectedPlanId,
   } = useFellow();
 
   const [messageText, setMessageText] = useState<string>('');
@@ -86,16 +88,38 @@ export const ExpiringChatModal: React.FC<ExpiringChatModalProps> = ({ planId, on
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAE7E2] bg-[#F9F8F6]">
           <div className="text-left truncate mr-3">
-            <h3 className="font-editorial text-lg font-semibold text-[#1A1918] truncate">{plan.title}</h3>
-            <div className="flex items-center gap-2 text-xs text-[#6B6966] mt-0.5">
-              <span className="flex items-center gap-1 truncate font-medium">
-                <MapPin className="w-3.5 h-3.5 text-[#E64A2A] shrink-0" />
-                {plan.venue_name}
-              </span>
-            </div>
+            <button
+              onClick={() => {
+                setSelectedPlanId(plan.id);
+                onClose();
+              }}
+              className="text-left group cursor-pointer"
+            >
+              <h3 className="font-editorial text-lg font-semibold text-[#1A1918] group-hover:text-[#E64A2A] transition-colors truncate flex items-center gap-1.5">
+                <span>{plan.title}</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 shrink-0" />
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-[#6B6966] mt-0.5">
+                <span className="flex items-center gap-1 truncate font-medium group-hover:underline">
+                  <MapPin className="w-3.5 h-3.5 text-[#E64A2A] shrink-0" />
+                  {plan.venue_name} · {plan.venue_address}
+                </span>
+              </div>
+            </button>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Table Details Shortcut */}
+            <button
+              onClick={() => {
+                setSelectedPlanId(plan.id);
+                onClose();
+              }}
+              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-[#EAE7E2] hover:bg-[#EAE7E2] text-xs font-semibold text-[#1A1918] transition-colors cursor-pointer"
+            >
+              <span>Table Details</span>
+            </button>
+
             {/* Countdown timer badge */}
             <span className="text-[11px] font-mono-code font-semibold px-2.5 py-1 rounded-full bg-white border border-[#EAE7E2] text-[#1A1918] flex items-center gap-1 shadow-2xs">
               <Clock className="w-3 h-3 text-[#E64A2A]" />

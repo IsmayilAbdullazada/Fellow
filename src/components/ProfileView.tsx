@@ -59,16 +59,16 @@ export const ProfileView: React.FC = () => {
         id="verified-passport-status-card"
         className="relative overflow-hidden bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-5"
       >
-        {/* Subtle Guilloche / Watermark Pattern */}
+        {/* Subtle Watermark Pattern */}
         <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full border-[12px] border-[#EAE7E2]/40 pointer-events-none" />
         <div className="absolute top-3 right-5 text-[9px] font-mono-code uppercase tracking-[0.2em] text-[#9C9892]">
-          FELLOW GLOBAL VERIFIED · KYC v5
+          FELLOW VERIFIED TRAVELER
         </div>
 
         {/* Passport Header Row */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            {/* Biometric KYC Squircle with Emerald Ring */}
+            {/* Verified Photo Frame */}
             <div className="relative shrink-0">
               <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-[22px] overflow-hidden border-2 border-[#059669] shadow-sm bg-[#F9F8F6]">
                 <img
@@ -80,7 +80,7 @@ export const ProfileView: React.FC = () => {
               {currentUser.is_verified && (
                 <div
                   className="absolute -bottom-1 -right-1 bg-[#059669] text-white rounded-full p-1 border-2 border-white shadow-xs"
-                  title="Stripe Biometric Liveness Passed"
+                  title="Verified Solo Traveler"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 stroke-[2.5]" />
                 </div>
@@ -103,7 +103,7 @@ export const ProfileView: React.FC = () => {
                 {currentUser.is_verified ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#059669] text-[11px] font-semibold tracking-wide">
                     <ShieldCheck className="w-3 h-3 stroke-[2.5]" />
-                    <span>VERIFIED PASSPORT ID</span>
+                    <span>VERIFIED ID</span>
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFFBEB] border border-[#FDE68A] text-[#D97706] text-[11px] font-semibold">
@@ -115,27 +115,27 @@ export const ProfileView: React.FC = () => {
             </div>
           </div>
 
-          {/* Cryptographic Ref Hash */}
+          {/* Member Badge */}
           <div className="hidden sm:flex flex-col items-end text-right">
-            <span className="text-[10px] uppercase font-mono-code text-[#9C9892]">Hash Signature</span>
+            <span className="text-[10px] uppercase font-mono-code text-[#9C9892]">Member ID</span>
             <span className="text-xs font-mono-code font-bold text-[#1A1918] bg-[#F9F8F6] px-2 py-1 rounded border border-[#EAE7E2] mt-0.5">
-              FEL-{currentUser.id.slice(-4).toUpperCase()}-TYO-SEC
+              TYO-{currentUser.id.slice(-4).toUpperCase()}
             </span>
           </div>
         </div>
 
-        {/* Passport Biometric Specs Bar */}
+        {/* Passport Verification Status Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-xs">
           <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-2.5">
-            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Document Check</span>
+            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Government ID</span>
             <p className="font-semibold text-[#1A1918] mt-0.5">
-              {currentUser.is_verified ? 'Passport / Gov ID' : 'Pending Scan'}
+              {currentUser.is_verified ? 'Passport / ID Verified' : 'Pending Scan'}
             </p>
           </div>
           <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-2.5">
-            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Biometric 3D Mesh</span>
+            <span className="text-[10px] text-[#9C9892] uppercase font-semibold">Photo Check</span>
             <p className="font-semibold text-[#1A1918] mt-0.5">
-              {currentUser.is_verified ? 'Liveness Confirmed' : 'Not Captured'}
+              {currentUser.is_verified ? 'Confirmed Match' : 'Not Captured'}
             </p>
           </div>
           <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-2.5">
@@ -156,14 +156,14 @@ export const ProfileView: React.FC = () => {
         {!currentUser.is_verified && (
           <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <p className="text-xs font-semibold text-[#D97706]">Complete One-Time Stripe Identity Check</p>
+              <p className="text-xs font-semibold text-[#D97706]">Verify Your Government ID</p>
               <p className="text-[11px] text-[#B45309]">
-                Verification is required to host or attend micro-plans in Tokyo and Lisbon.
+                ID verification is required to host or join meetups in Tokyo and Lisbon.
               </p>
             </div>
             <button
               onClick={startVerificationFlow}
-              className="px-4 py-2 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-xs transition-all shadow-sm active:scale-95 shrink-0"
+              className="px-4 py-2 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-xs transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
             >
               Verify Identity ($9.99)
             </button>
@@ -247,57 +247,59 @@ export const ProfileView: React.FC = () => {
         </form>
       </div>
 
-      {/* Switch Persona Simulation Bar for Evaluation */}
-      <div className="bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-[#1A1918]">Switch Test Persona</h3>
-          <span className="text-[11px] text-[#9C9892]">Fast-switch MVP roles</span>
-        </div>
-        <p className="text-xs text-[#6B6966]">
-          Switch between personas to test verification requirements, host check-in QR codes, and female-only safety policies:
-        </p>
+      {/* Dev Mode Only: Switch Persona Simulation Bar */}
+      {typeof window !== 'undefined' && (window.location.search.includes('dev=true') || localStorage.getItem('fellow_dev_mode') === 'true') && (
+        <div className="bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm text-[#1A1918]">Developer Sandbox: Switch Persona</h3>
+            <span className="text-[11px] text-[#9C9892]">Gated QA Mode</span>
+          </div>
+          <p className="text-xs text-[#6B6966]">
+            Switch between personas to test verification requirements, host check-in QR codes, and female-only safety policies:
+          </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          {allUsers.map((u) => {
-            const isSelected = currentUser.id === u.id;
-            return (
-              <button
-                key={u.id}
-                onClick={() => switchPersona(u.id)}
-                className={`p-3 rounded-2xl border text-left transition-all ${
-                  isSelected
-                    ? 'border-[#E64A2A] bg-[#E64A2A]/5 text-[#1A1918] font-semibold shadow-2xs'
-                    : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:border-[#D1CDC7]'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-[#1A1918] flex items-center gap-1.5">
-                    <span>{u.display_name}</span>
-                    <span>{u.origin_flag}</span>
-                  </p>
-                  <span className="text-[10px] font-mono-code font-semibold px-2 py-0.5 rounded-full bg-white border border-[#EAE7E2] text-[#6B6966]">
-                    {u.gender === 'female' ? '♀ Female' : '♂ Male'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span
-                    className={`text-[11px] font-medium ${
-                      u.is_verified ? 'text-[#059669]' : 'text-[#D97706]'
-                    }`}
-                  >
-                    {u.is_verified ? '✓ Verified KYC · Active' : '● Unverified Backpacker'}
-                  </span>
-                  {isSelected && (
-                    <span className="text-[10px] bg-[#E64A2A] text-white px-2 py-0.2 rounded-full font-semibold">
-                      Current
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            {allUsers.map((u) => {
+              const isSelected = currentUser.id === u.id;
+              return (
+                <button
+                  key={u.id}
+                  onClick={() => switchPersona(u.id)}
+                  className={`p-3 rounded-2xl border text-left transition-all ${
+                    isSelected
+                      ? 'border-[#E64A2A] bg-[#E64A2A]/5 text-[#1A1918] font-semibold shadow-2xs'
+                      : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:border-[#D1CDC7]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-[#1A1918] flex items-center gap-1.5">
+                      <span>{u.display_name}</span>
+                      <span>{u.origin_flag}</span>
+                    </p>
+                    <span className="text-[10px] font-mono-code font-semibold px-2 py-0.5 rounded-full bg-white border border-[#EAE7E2] text-[#6B6966]">
+                      {u.gender === 'female' ? '♀ Female' : '♂ Male'}
                     </span>
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span
+                      className={`text-[11px] font-medium ${
+                        u.is_verified ? 'text-[#059669]' : 'text-[#D97706]'
+                      }`}
+                    >
+                      {u.is_verified ? '✓ ID Verified · Active' : '● Unverified Traveler'}
+                    </span>
+                    {isSelected && (
+                      <span className="text-[10px] bg-[#E64A2A] text-white px-2 py-0.2 rounded-full font-semibold">
+                        Current
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Safety & Charter Review */}
       <div className="bg-white border border-[#EAE7E2] rounded-3xl p-6 sm:p-7 shadow-bento space-y-4">
@@ -323,6 +325,23 @@ export const ProfileView: React.FC = () => {
             <span>Review Platonic Non-Dating Charter</span>
           </button>
         </div>
+      </div>
+
+      {/* Discrete QA Sandbox Toggle for Evaluation */}
+      <div className="pt-2 pb-4 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            const current = localStorage.getItem('fellow_dev_mode') === 'true';
+            localStorage.setItem('fellow_dev_mode', current ? 'false' : 'true');
+            window.location.reload();
+          }}
+          className="text-[10px] text-[#9C9892] hover:text-[#1A1918] transition-colors uppercase tracking-widest font-mono-code cursor-pointer"
+        >
+          {typeof window !== 'undefined' && (window.location.search.includes('dev=true') || localStorage.getItem('fellow_dev_mode') === 'true')
+            ? '● QA Sandbox Active (Click to Disable)'
+            : '○ QA Persona Sandbox (Click to Enable)'}
+        </button>
       </div>
     </div>
   );

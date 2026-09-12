@@ -72,6 +72,10 @@ export interface MicroPlan {
   max_participants: number; // 2 - 4
   female_only: boolean;
   photo_url?: string;
+  reservation_type?: 'booked_table' | 'walk_in';
+  payment_method?: 'cards_accepted' | 'cash_required';
+  estimated_cost?: string;
+  host_deposit_status?: 'held' | 'released';
   status: PlanStatus;
   qr_checkin_token: string;
   created_at: string;

@@ -6,6 +6,11 @@ import {
   Clock,
   Users,
   Search,
+  Receipt,
+  CreditCard,
+  Utensils,
+  DollarSign,
+  ShieldCheck,
 } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 import { PlanCategory, CommercialVenue } from '../types';
@@ -37,6 +42,9 @@ export const HostPlanModal: React.FC = () => {
   const [durationHours, setDurationHours] = useState<number>(2);
   const [maxParticipants, setMaxParticipants] = useState<number>(4);
   const [femaleOnly, setFemaleOnly] = useState<boolean>(false);
+  const [reservationType, setReservationType] = useState<'walk_in' | 'host_reserved' | 'advance_booking_required'>('walk_in');
+  const [paymentMethod, setPaymentMethod] = useState<'separate_checks' | 'split_equally' | 'self_pay'>('separate_checks');
+  const [estimatedCost, setEstimatedCost] = useState<string>('$15–$25 per person');
 
   // Venue search & selection (Google Places Commercial Establishments)
   const [venueSearchQuery, setVenueSearchQuery] = useState<string>('');
@@ -132,6 +140,9 @@ export const HostPlanModal: React.FC = () => {
       end_time: endDateTime.toISOString(),
       max_participants: maxParticipants,
       female_only: femaleOnly,
+      reservation_type: reservationType,
+      payment_method: paymentMethod,
+      estimated_cost: estimatedCost,
     });
 
     if (result.success) {
@@ -163,32 +174,32 @@ export const HostPlanModal: React.FC = () => {
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-4 text-left">
+        <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-5 text-left">
           {/* Field 1: Category */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#1A1918]">Category</label>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-xs">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-[#1A1918] uppercase tracking-wider">Category</label>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
               {(['dining', 'cafe_cowork', 'cultural_sight', 'outdoor_walk', 'nightlife'] as PlanCategory[]).map(
                 (cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => setCategory(cat)}
-                    className={`py-2 px-2 rounded-xl border text-center transition-all capitalize font-semibold ${
+                    className={`min-h-[44px] py-2.5 px-3 rounded-xl border-2 text-center transition-all capitalize font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
                       category === cat
-                        ? 'border-[#1A1918] bg-[#1A1918] text-white shadow-2xs'
-                        : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:bg-[#EAE7E2]/50'
+                        ? 'border-[#1A1918] bg-[#1A1918] text-white shadow-sm'
+                        : 'border-[#D1CDC7] bg-white text-[#4A4744] hover:border-[#1A1918]'
                     }`}
                   >
                     {cat === 'dining'
-                      ? 'Dining'
+                      ? '🍽️ Dining'
                       : cat === 'cafe_cowork'
-                      ? 'Cowork'
+                      ? '☕ Cowork'
                       : cat === 'cultural_sight'
-                      ? 'Culture'
+                      ? '🏛️ Culture'
                       : cat === 'outdoor_walk'
-                      ? 'Walk'
-                      : 'Nightlife'}
+                      ? '🚶 Walk'
+                      : '🍸 Drinks'}
                   </button>
                 )
               )}
@@ -198,8 +209,8 @@ export const HostPlanModal: React.FC = () => {
           {/* Field 2: Title (max 60 chars) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-semibold text-[#1A1918]">Plan Title</label>
-              <span className={`text-[11px] font-mono-code ${title.length > 55 ? 'text-[#DC2626]' : 'text-[#9C9892]'}`}>
+              <label className="font-bold text-[#1A1918]">Plan Title</label>
+              <span className={`text-[11px] font-mono-code font-bold ${title.length > 55 ? 'text-[#DC2626]' : 'text-[#6B6966]'}`}>
                 {title.length}/60
               </span>
             </div>
@@ -210,15 +221,15 @@ export const HostPlanModal: React.FC = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Sunset drinks at Miradouro de Santa Catarina"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white placeholder:text-[#9C9892]"
+              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918] focus:ring-1 focus:ring-[#1A1918] placeholder:text-[#6B6966]"
             />
           </div>
 
           {/* Field 3: Description (max 300 chars) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-semibold text-[#1A1918]">Description</label>
-              <span className={`text-[11px] font-mono-code ${description.length > 280 ? 'text-[#DC2626]' : 'text-[#9C9892]'}`}>
+              <label className="font-bold text-[#1A1918]">Description</label>
+              <span className={`text-[11px] font-mono-code font-bold ${description.length > 280 ? 'text-[#DC2626]' : 'text-[#6B6966]'}`}>
                 {description.length}/300
               </span>
             </div>
@@ -228,42 +239,42 @@ export const HostPlanModal: React.FC = () => {
               maxLength={300}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What will you do? Where exactly will you meet? Keep it low-commitment and fun."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white placeholder:text-[#9C9892] resize-none"
+              placeholder="What will you do? Where will you meet? Keep it low-commitment and welcoming."
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918] focus:ring-1 focus:ring-[#1A1918] placeholder:text-[#6B6966] resize-none"
             />
           </div>
 
           {/* Field 4 & 5: Date, Time & Duration */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-[#1A1918]">Date (Within 7 Days)</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1A1918]">Date (Upcoming 7 Days)</label>
               <input
                 id="input-plan-date"
                 type="date"
                 value={planDate}
                 onChange={(e) => setPlanDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918]"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-[#1A1918]">Start Time</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1A1918]">Start Time</label>
               <input
                 id="input-plan-time"
                 type="time"
                 value={planTime}
                 onChange={(e) => setPlanTime(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918]"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-[#1A1918]">Duration (Max 4h)</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1A1918]">Duration (Max 4h)</label>
               <select
                 id="select-plan-duration"
                 value={durationHours}
                 onChange={(e) => setDurationHours(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white cursor-pointer"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918] cursor-pointer"
               >
                 <option value={1.5}>1.5 Hours</option>
                 <option value={2}>2.0 Hours</option>
@@ -276,25 +287,25 @@ export const HostPlanModal: React.FC = () => {
           {/* Field 6: Venue Location (Google Places commercial venues only) */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-semibold text-[#1A1918]">
-                Commercial Venue (Google Places Verified)
+              <label className="font-bold text-[#1A1918]">
+                Commercial Venue (Public Establishments Only)
               </label>
-              <span className="text-[11px] text-[#059669] font-medium">Public places only</span>
+              <span className="text-[11px] text-[#059669] font-bold">✓ Places Verified</span>
             </div>
 
             {selectedVenue ? (
-              <div className="p-3.5 rounded-2xl bg-[#F9F8F6] border border-[#EAE7E2] flex items-start justify-between gap-2">
+              <div className="p-3.5 rounded-2xl bg-[#FAF9F6] border-2 border-[#1A1918] flex items-start justify-between gap-2 shadow-xs">
                 <div className="space-y-0.5">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1A1918]">
-                    <MapPin className="w-3.5 h-3.5 text-[#E64A2A] shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#1A1918]">
+                    <MapPin className="w-4 h-4 text-[#E64A2A] shrink-0" />
                     <span>{selectedVenue.name}</span>
                   </div>
-                  <p className="text-[11px] text-[#6B6966]">{selectedVenue.address}</p>
+                  <p className="text-[11px] text-[#4A4744]">{selectedVenue.address}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedVenue(null)}
-                  className="text-xs text-[#E64A2A] font-semibold hover:underline p-1"
+                  className="text-xs text-[#E64A2A] font-bold hover:underline p-1 cursor-pointer"
                 >
                   Change
                 </button>
@@ -302,29 +313,29 @@ export const HostPlanModal: React.FC = () => {
             ) : (
               <div className="space-y-2">
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#9C9892] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-[#6B6966] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={venueSearchQuery}
                     onChange={(e) => setVenueSearchQuery(e.target.value)}
                     placeholder={`Search verified establishments in ${city.name}...`}
-                    className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918] text-xs focus:outline-none focus:border-[#1A1918] focus:bg-white placeholder:text-[#9C9892]"
+                    className="w-full min-h-[44px] pl-9 pr-3.5 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918] placeholder:text-[#6B6966]"
                   />
                 </div>
 
                 {/* Venues suggestions list */}
-                <div className="max-h-32 overflow-y-auto space-y-1 rounded-2xl border border-[#EAE7E2] bg-[#F9F8F6] p-1 text-xs">
+                <div className="max-h-36 overflow-y-auto space-y-1 rounded-2xl border-2 border-[#D1CDC7] bg-[#FAF9F6] p-1.5 text-xs">
                   {searchedVenues.map((v) => (
                     <button
                       key={v.place_id}
                       type="button"
                       onClick={() => setSelectedVenue(v)}
-                      className="w-full text-left p-2.5 rounded-xl hover:bg-white hover:shadow-2xs transition-all flex items-start gap-2 text-[#6B6966]"
+                      className="w-full text-left p-2.5 rounded-xl hover:bg-white hover:shadow-xs transition-all flex items-start gap-2 text-[#4A4744] cursor-pointer"
                     >
-                      <MapPin className="w-3.5 h-3.5 text-[#E64A2A] shrink-0 mt-0.5" />
+                      <MapPin className="w-4 h-4 text-[#E64A2A] shrink-0 mt-0.5" />
                       <div className="truncate">
-                        <p className="font-semibold text-[#1A1918] truncate">{v.name}</p>
-                        <p className="text-[10px] text-[#9C9892] truncate">{v.address}</p>
+                        <p className="font-bold text-[#1A1918] truncate">{v.name}</p>
+                        <p className="text-[11px] text-[#6B6966] truncate">{v.address}</p>
                       </div>
                     </button>
                   ))}
@@ -336,8 +347,8 @@ export const HostPlanModal: React.FC = () => {
           {/* Field 7: Group Size (2 to 4 people) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <label className="font-semibold text-[#1A1918]">Max Group Size (Including Host)</label>
-              <span className="text-[11px] text-[#9C9892]">2 to 4 travelers max</span>
+              <label className="font-bold text-[#1A1918]">Max Group Size (Including Host)</label>
+              <span className="text-[11px] text-[#6B6966] font-medium">Strictly 2–4 travelers max</span>
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               {[2, 3, 4].map((size) => (
@@ -345,10 +356,10 @@ export const HostPlanModal: React.FC = () => {
                   key={size}
                   type="button"
                   onClick={() => setMaxParticipants(size)}
-                  className={`py-2.5 rounded-xl border text-center transition-all font-semibold ${
+                  className={`min-h-[44px] py-2.5 rounded-xl border-2 text-center transition-all font-bold cursor-pointer ${
                     maxParticipants === size
-                      ? 'border-[#1A1918] bg-[#1A1918] text-white shadow-2xs'
-                      : 'border-[#EAE7E2] bg-[#F9F8F6] text-[#6B6966] hover:bg-[#EAE7E2]/50'
+                      ? 'border-[#1A1918] bg-[#1A1918] text-white shadow-xs'
+                      : 'border-[#D1CDC7] bg-white text-[#4A4744] hover:border-[#1A1918]'
                   }`}
                 >
                   {size} People {size === 4 && '(Max)'}
@@ -358,16 +369,16 @@ export const HostPlanModal: React.FC = () => {
           </div>
 
           {/* Field 8: Safety Toggle (Female-Only) */}
-          <div className="p-4 rounded-2xl bg-[#F9F8F6] border border-[#EAE7E2] flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-[#FAF9F6] border-2 border-[#D1CDC7] flex items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1A1918]">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#1A1918]">
                 <span>Make this a Female-Only Plan</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] font-semibold">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] font-bold">
                   ♀ Protected
                 </span>
               </div>
-              <p className="text-[11px] text-[#6B6966] leading-relaxed">
-                Only verified female-identifying travelers can see or request to join.
+              <p className="text-[11px] text-[#4A4744] leading-relaxed">
+                Only verified female-identifying travelers can discover or request a seat.
               </p>
             </div>
 
@@ -380,17 +391,83 @@ export const HostPlanModal: React.FC = () => {
                   onChange={(e) => setFemaleOnly(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-[#EAE7E2] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#059669]"></div>
+                <div className="w-11 h-6 bg-[#D1CDC7] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#059669]"></div>
               </label>
             ) : (
-              <span className="text-[10px] text-[#9C9892] font-semibold px-2 py-1 rounded-md bg-white border border-[#EAE7E2]">
+              <span className="text-[10px] text-[#6B6966] font-bold px-2 py-1 rounded-md bg-white border border-[#D1CDC7]">
                 Disabled for male hosts
               </span>
             )}
           </div>
 
+          {/* Field 9: Table Reservation Strategy */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-[#1A1918]">Table Reservation Status</label>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              {[
+                { val: 'walk_in', label: 'Walk-in Table', desc: 'Host arrives early' },
+                { val: 'host_reserved', label: 'Host Reserved', desc: 'Booked in advance' },
+                { val: 'advance_booking_required', label: 'Ticket / Entry', desc: 'Guests buy ticket' },
+              ].map((item) => (
+                <button
+                  key={item.val}
+                  type="button"
+                  onClick={() => setReservationType(item.val as any)}
+                  className={`p-2.5 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                    reservationType === item.val
+                      ? 'border-[#1A1918] bg-[#1A1918] text-white shadow-xs'
+                      : 'border-[#D1CDC7] bg-white text-[#4A4744] hover:border-[#1A1918]'
+                  }`}
+                >
+                  <p className="font-bold truncate">{item.label}</p>
+                  <p className={`text-[10px] truncate ${reservationType === item.val ? 'text-white/80' : 'text-[#6B6966]'}`}>
+                    {item.desc}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Field 10: Bill Settlement & Budget */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1A1918]">Bill Splitting</label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value as any)}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918] cursor-pointer"
+              >
+                <option value="separate_checks">Separate Checks (Ask server)</option>
+                <option value="split_equally">Split Bill Equally (Even split)</option>
+                <option value="self_pay">Pay as You Order (Counter service)</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1A1918]">Estimated Budget</label>
+              <input
+                type="text"
+                value={estimatedCost}
+                onChange={(e) => setEstimatedCost(e.target.value)}
+                placeholder="$15–$25 per person"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-white border-2 border-[#D1CDC7] text-[#1A1918] text-xs font-medium focus:outline-none focus:border-[#1A1918]"
+              />
+            </div>
+          </div>
+
+          {/* Host Accountability Banner */}
+          <div className="bg-[#FAF9F6] border-2 border-[#EAE7E2] rounded-2xl p-3.5 flex items-start gap-3 text-left">
+            <ShieldCheck className="w-5 h-5 text-[#059669] shrink-0 mt-0.5" />
+            <div className="text-xs space-y-0.5">
+              <p className="font-bold text-[#1A1918]">Host Skin-in-the-Game Guarantee</p>
+              <p className="text-[#6B6966] text-[11px] leading-relaxed">
+                As host, you commit an equal $10 seat hold authorization. Once you arrive at {selectedVenue ? selectedVenue.name : 'the venue'} and present your dynamic check-in screen, your hold is released at $0.00.
+              </p>
+            </div>
+          </div>
+
           {formError && (
-            <div className="bg-[#FDF2F2] border border-[#F87171] rounded-2xl p-3.5 text-xs text-[#DC2626] font-medium">
+            <div className="bg-[#FEF2F2] border-2 border-[#FCA5A5] rounded-2xl p-3.5 text-xs text-[#DC2626] font-bold">
               {formError}
             </div>
           )}
@@ -400,10 +477,10 @@ export const HostPlanModal: React.FC = () => {
             <button
               id="btn-publish-micro-plan"
               type="submit"
-              className="w-full py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-[#E64A2A]/20 active:scale-[0.99] transition-all"
+              className="w-full min-h-[48px] py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#E64A2A]/20 active:scale-[0.99] transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>Publish Plan</span>
+              <span>Publish Verified Plan</span>
             </button>
           </div>
         </form>

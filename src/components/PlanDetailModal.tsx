@@ -12,6 +12,10 @@ import {
   CheckCircle2,
   Calendar,
   Share2,
+  Receipt,
+  CreditCard,
+  Utensils,
+  BadgeCheck,
 } from 'lucide-react';
 import { useFellow } from '../context/FellowContext';
 import { LightweightProfileModal } from './LightweightProfileModal';
@@ -200,6 +204,60 @@ export const PlanDetailModal: React.FC<PlanDetailModalProps> = ({ planId, onClos
                   <span>Google Maps</span>
                 </a>
               </div>
+
+              {/* Table Logistics & Billing Method */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-[#EAE7E2]">
+                <div className="bg-white rounded-lg p-2 border border-[#EAE7E2]">
+                  <span className="text-[10px] text-[#9C9892] block uppercase font-semibold">Table Status</span>
+                  <span className="font-semibold text-[#1A1918] text-xs">
+                    {plan.reservation_type === 'host_reserved'
+                      ? 'Host Reserved'
+                      : plan.reservation_type === 'advance_booking_required'
+                      ? 'Ticket Required'
+                      : 'Walk-In Table'}
+                  </span>
+                </div>
+                <div className="bg-white rounded-lg p-2 border border-[#EAE7E2]">
+                  <span className="text-[10px] text-[#9C9892] block uppercase font-semibold">Bill Settlement</span>
+                  <span className="font-semibold text-[#1A1918] text-xs">
+                    {plan.payment_method === 'split_equally'
+                      ? 'Split Equally'
+                      : plan.payment_method === 'self_pay'
+                      ? 'Pay as You Order'
+                      : 'Separate Checks'}
+                  </span>
+                </div>
+                <div className="bg-white rounded-lg p-2 border border-[#EAE7E2]">
+                  <span className="text-[10px] text-[#9C9892] block uppercase font-semibold">Est. Budget</span>
+                  <span className="font-semibold text-[#1A1918] text-xs">
+                    {plan.estimated_cost || '$15–$25 per person'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Tiered Cancellation Transparency */}
+            <div className="bg-[#FAF9F6] border border-[#EAE7E2] rounded-xl p-3.5 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-[#1A1918]">Fair Tiered Cancellation Policy</span>
+                <span className="text-[10px] font-mono-code text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]">
+                  Equal Host & Guest Hold
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-[11px] text-left">
+                <div className="p-2 rounded-lg bg-white border border-[#EAE7E2]">
+                  <p className="font-semibold text-[#059669]">&gt; 12 Hours</p>
+                  <p className="text-[#6B6966] text-[10px]">100% Free · $0 Fee</p>
+                </div>
+                <div className="p-2 rounded-lg bg-white border border-[#EAE7E2]">
+                  <p className="font-semibold text-[#D97706]">2h to 12h</p>
+                  <p className="text-[#6B6966] text-[10px]">$5 Flex Late Fee</p>
+                </div>
+                <div className="p-2 rounded-lg bg-white border border-[#EAE7E2]">
+                  <p className="font-semibold text-[#DC2626]">&lt; 2h or No-Show</p>
+                  <p className="text-[#6B6966] text-[10px]">$10 Hold Forfeited</p>
+                </div>
+              </div>
             </div>
 
             {/* The Plan Description */}
@@ -301,10 +359,10 @@ export const PlanDetailModal: React.FC<PlanDetailModalProps> = ({ planId, onClos
                 <button
                   id="btn-open-group-chat"
                   onClick={handleOpenChat}
-                  className="w-full py-3.5 px-4 rounded-full bg-[#059669] hover:bg-[#047857] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-sm"
+                  className="w-full py-3.5 px-4 rounded-full bg-[#059669] hover:bg-[#047857] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-sm cursor-pointer"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>Open Ephemeral Plan Chat</span>
+                  <span>Open Meetup Group Chat</span>
                 </button>
                 <p className="text-[11px] text-center text-[#059669] font-medium">
                   ✓ Confirmed Attendee · $10 refundable hold active
@@ -317,7 +375,7 @@ export const PlanDetailModal: React.FC<PlanDetailModalProps> = ({ planId, onClos
                   <span>Pending Host Approval</span>
                 </div>
                 <p className="text-[11px] text-[#B45309] leading-relaxed">
-                  Your $10 temporary authorization is held and will only convert or release when confirmed.
+                  Your $10 refundable hold is placed and will be released when you check in.
                 </p>
               </div>
             ) : !currentUser.is_verified || !currentUser.has_paid_pass ? (
@@ -325,13 +383,13 @@ export const PlanDetailModal: React.FC<PlanDetailModalProps> = ({ planId, onClos
                 <button
                   id="btn-verify-identity-to-join"
                   onClick={startVerificationFlow}
-                  className="w-full py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-md shadow-[#E64A2A]/20"
+                  className="w-full py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-md shadow-[#E64A2A]/20 cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
                   <span>Verify Identity to Join ($9.99 Pass)</span>
                 </button>
                 <p className="text-[11px] text-center text-[#9C9892]">
-                  One-time pass covers government KYC & liveness check for all hubs forever.
+                  One-time pass covers secure identity verification for all hubs forever.
                 </p>
               </div>
             ) : isFull ? (

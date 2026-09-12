@@ -26,17 +26,15 @@ export const CityWaitlistModal: React.FC<CityWaitlistModalProps> = ({ city, onCl
     setSubmitted(true);
   };
 
-  const handleSwitchToUnlockedHub = () => {
-    if (city.id === 'dps') {
-      setActiveCityCode('DPS_ID' as CityCode);
-    }
+  const handleSwitchToLiveHub = (hubCode: CityCode) => {
+    setActiveCityCode(hubCode);
     setActiveTab('discover');
     onClose();
   };
 
   const handleSimulateUnlock = () => {
     // Push count directly to threshold
-    registerWaitlist(city.id, arrivalDate, departureDate, 'test_200th_member@fellow.travel');
+    registerWaitlist(city.id, arrivalDate, departureDate, 'launch_cohort_200@fellow.travel');
   };
 
   return (
@@ -72,10 +70,17 @@ export const CityWaitlistModal: React.FC<CityWaitlistModalProps> = ({ city, onCl
 
             <div className="pt-2 flex flex-col gap-2">
               <button
-                onClick={handleSwitchToUnlockedHub}
-                className="w-full py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+                onClick={() => handleSwitchToLiveHub('TYO_JP')}
+                className="w-full py-3 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
               >
-                <span>Switch to {city.city_name} Hub Now</span>
+                <span>Browse Live Meetups in Tokyo Hub</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleSwitchToLiveHub('LIS_PT')}
+                className="w-full py-3 px-4 rounded-full bg-[#1A1918] hover:bg-[#2E2C29] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+              >
+                <span>Browse Live Meetups in Lisbon Hub</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button

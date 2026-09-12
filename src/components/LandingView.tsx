@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Compass,
   ArrowRight,
@@ -38,6 +38,13 @@ export const LandingView: React.FC = () => {
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState<boolean>(false);
   const [walkthroughStep, setWalkthroughStep] = useState<number>(1);
   const [femaleFilterPreview, setFemaleFilterPreview] = useState<boolean>(true);
+
+  // If user signs in while on the landing page, automatically transition to discover feed
+  useEffect(() => {
+    if (isAuthenticated) {
+      setActiveTab('discover');
+    }
+  }, [isAuthenticated, setActiveTab]);
 
   // Filter plans for the showcase
   const activeHubPlans = plans.filter(
@@ -163,7 +170,7 @@ export const LandingView: React.FC = () => {
               {/* Layer 2 (Top Floating Chip): Angled -4 deg Identity Badge */}
               <div className="absolute top-4 right-4 rotate-[-3deg] bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/80 shadow-lg text-[11px] font-semibold text-[#1A1918] flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#059669] stroke-[2.5]" />
-                <span>Stripe Verified · All 3 Guests ID-Checked</span>
+                <span>Identity Verified · All 3 Guests Confirmed</span>
               </div>
 
               {/* Layer 3 (Mid Floating UI Card): Real Live Plan Card in Frosted Glass */}
@@ -246,13 +253,13 @@ export const LandingView: React.FC = () => {
       <section className="space-y-6 text-left mb-14">
         <div>
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#E64A2A]">
-            Engineered for Genuine Human Connection
+            Built for Real Human Connection
           </span>
           <h2 className="font-editorial text-2xl sm:text-4xl font-semibold text-[#1A1918] mt-1">
-            Re-architected for comfort, trust, and zero awkwardness.
+            Designed for comfort, trust, and zero awkwardness.
           </h2>
           <p className="text-xs sm:text-sm text-[#6B6966] max-w-xl mt-1.5">
-            Every feature on Fellow is built to eliminate the anxiety, ghosting, and predatory dynamics of traditional social apps.
+            Every feature on Fellow is built to eliminate the anxiety, ghosting, and awkwardness of meeting new people while traveling.
           </p>
         </div>
 
@@ -269,7 +276,7 @@ export const LandingView: React.FC = () => {
                 </span>
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#059669]/20 border border-[#059669]/40 text-[#34D399] text-xs font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Stripe Biometric Verified</span>
+                  <span>Government ID Verified</span>
                 </div>
               </div>
 
@@ -288,7 +295,7 @@ export const LandingView: React.FC = () => {
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
                     </div>
                     <p className="text-[11px] font-mono-code text-[#9C9892]">
-                      COHORT ID: TYO-2026-9812 · PASSPORT
+                      MEMBER ID: TYO-9812 · VERIFIED TRAVELER
                     </p>
                   </div>
                 </div>
@@ -296,7 +303,7 @@ export const LandingView: React.FC = () => {
                 <div className="pt-2 border-t border-[#33302D] flex items-center justify-between text-[11px] text-[#A3A09A]">
                   <span>RELIABILITY SCORE: <strong className="text-white font-mono-code">100%</strong></span>
                   <span>ATTENDANCE: <strong className="text-white font-mono-code">8/8 MEETS</strong></span>
-                  <span className="text-[#34D399]">NO RECENT STRIKES</span>
+                  <span className="text-[#34D399]">VERIFIED MEMBER</span>
                 </div>
               </div>
 
@@ -305,14 +312,14 @@ export const LandingView: React.FC = () => {
                   Zero anonymous strangers. Ever.
                 </h3>
                 <p className="text-xs sm:text-sm text-[#A3A09A] leading-relaxed mt-1 max-w-lg">
-                  Bank-grade verification filters out bots, trolls, and bad actors before they enter. Every member completes 3D biometric liveness and government ID validation.
+                  Real identity verification filters out fake accounts and bad actors before they enter. Every member verifies their government ID before joining any table.
                 </p>
               </div>
             </div>
 
             <div className="pt-4 mt-2 border-t border-[#2E2C29] flex items-center justify-between text-xs text-[#A3A09A]">
-              <span>Platonic Community Charter signed prior to entry</span>
-              <span className="text-[#E64A2A] font-semibold">Strictly Non-Dating Policy →</span>
+              <span>Platonic Community Charter agreed by all members</span>
+              <span className="text-[#E64A2A] font-semibold">Strictly Non-Dating Community →</span>
             </div>
           </div>
 
@@ -321,7 +328,7 @@ export const LandingView: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#E64A2A]">
-                  Pre-Auth Hold Engine
+                  Refundable Holds
                 </span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
                   96% Show-Up Rate
@@ -331,17 +338,17 @@ export const LandingView: React.FC = () => {
               {/* Interactive Apple Pay / Transaction Receipt Mockup */}
               <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-2xl p-4 space-y-2 text-xs font-mono-code">
                 <div className="flex items-center justify-between text-[#6B6966]">
-                  <span>Authorized Hold:</span>
+                  <span>Temporary Seat Hold:</span>
                   <span className="text-[#1A1918] font-bold">$10.00 USD</span>
                 </div>
                 <div className="flex items-center justify-between text-[#6B6966]">
                   <span>Host Table QR:</span>
-                  <span className="text-[#059669] font-semibold">Scanned 7:32 PM</span>
+                  <span className="text-[#059669] font-semibold">Checked In 7:32 PM</span>
                 </div>
                 <div className="pt-1.5 border-t border-[#EAE7E2] flex items-center justify-between text-xs font-bold text-[#059669]">
-                  <span>Final Billed Charge:</span>
+                  <span>Amount Charged:</span>
                   <span className="bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
-                    $0.00 (VOIDED)
+                    $0.00 (NO CHARGE)
                   </span>
                 </div>
               </div>
@@ -351,17 +358,17 @@ export const LandingView: React.FC = () => {
                   The $0 Anti-Flake Guarantee
                 </h3>
                 <p className="text-xs text-[#6B6966] leading-relaxed mt-1">
-                  People show up because their word is backed by a temporary deposit. Arrive at the table, scan the host’s QR code, and your $10 authorization is instantly voided.
+                  People show up because seats are held with a temporary deposit. Arrive at the table, check in with the host, and your $10 hold is released instantly ($0 charged).
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#EAE7E2] text-[11px] text-[#9C9892]">
-              Protected by Stripe Pre-Authorization Escrow
+            <div className="pt-3 border-t border-[#EAE7E2] text-[11px] text-[#059669] font-medium">
+              ✓ 100% refunded when you arrive at the meetup
             </div>
           </div>
 
-          {/* CARD 3: GENDER-SAFE ARCHITECTURE (Span 1 Column) */}
+          {/* CARD 3: WOMEN'S SAFETY SPACES (Span 1 Column) */}
           <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#EAE7E2] shadow-sm flex flex-col justify-between group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -399,28 +406,28 @@ export const LandingView: React.FC = () => {
 
               <div>
                 <h3 className="font-editorial text-xl font-semibold text-[#1A1918]">
-                  Women’s Safety as an Architecture
+                  Dedicated Women-Only Tables
                 </h3>
                 <p className="text-xs text-[#6B6966] leading-relaxed mt-1">
-                  Verified female solo travelers can create or join plans visible exclusively to other verified women with a single toggle. Zero male visibility when enabled.
+                  Verified female solo travelers can create or join plans visible exclusively to other verified women with a single toggle.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#EAE7E2] text-[11px] text-[#9C9892]">
-              Enforced at the database and UI query level
+            <div className="pt-3 border-t border-[#EAE7E2] text-[11px] text-[#059669] font-medium">
+              ✓ Only visible to verified women travelers
             </div>
           </div>
 
-          {/* CARD 4: 24-HR GHOST PURGE (Span 2 Columns) */}
+          {/* CARD 4: AUTOMATIC PRIVACY PURGE (Span 2 Columns) */}
           <div className="md:col-span-2 bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EC] rounded-3xl p-6 sm:p-8 border border-[#EAE7E2] shadow-sm flex flex-col justify-between group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6B6966]">
-                  Ephemeral Traveler Lifecycle
+                  Active Travel Window
                 </span>
                 <span className="text-xs font-mono-code font-bold text-[#E64A2A] bg-white px-2.5 py-0.5 rounded-full border border-[#EAE7E2]">
-                  AUTO-EXPIRING ARCHITECTURE
+                  PRIVACY BY DEFAULT
                 </span>
               </div>
 
@@ -432,44 +439,44 @@ export const LandingView: React.FC = () => {
                     <span className="font-mono-code font-bold text-xs text-[#1A1918]">LIS → LHR</span>
                   </div>
                   <div className="px-2.5 py-0.5 rounded bg-[#F9F8F6] border border-[#EAE7E2] text-[11px] font-mono-code text-[#6B6966]">
-                    FLIGHT DEPARTED: 24H AGO
+                    TRIP COMPLETED: YESTERDAY
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div>
-                    <p className="text-[10px] text-[#9C9892] uppercase font-mono-code">PROFILE STATUS</p>
+                    <p className="text-[10px] text-[#9C9892] uppercase font-mono-code">PROFILE IN HUB</p>
                     <p className="font-semibold text-[#1A1918] flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5 text-[#E64A2A]" />
-                      <span>Purged & Archived</span>
+                      <span>Hidden & Inactive</span>
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] text-[#9C9892] uppercase font-mono-code">MICRO-CHAT STATUS</p>
-                    <p className="font-semibold text-[#1A1918]">Dissolved into 0 bytes</p>
+                    <p className="text-[10px] text-[#9C9892] uppercase font-mono-code">MEETUP CHAT</p>
+                    <p className="font-semibold text-[#1A1918]">Automatically Cleared</p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] text-[#9C9892] uppercase font-mono-code">LOCATION RESIDUAL</p>
-                    <p className="font-semibold text-[#059669]">Zero Lat/Lng Cached</p>
+                    <p className="text-[10px] text-[#9C9892] uppercase font-mono-code">LOCATION DATA</p>
+                    <p className="font-semibold text-[#059669]">Never Tracked or Saved</p>
                   </div>
                 </div>
               </div>
 
               <div>
                 <h3 className="font-editorial text-xl sm:text-2xl font-semibold text-[#1A1918]">
-                  Fresh Cities, Zero Zombie Profiles
+                  Active Travelers Only, Zero Stale Profiles
                 </h3>
                 <p className="text-xs sm:text-sm text-[#6B6966] leading-relaxed mt-1">
-                  Fellow reflects who is in town right now. No inactive accounts from six months ago, and no permanent chat history. 24 hours after your trip window closes, your profile and group chats archive automatically.
+                  Fellow connects people in town right now. No ghost accounts from six months ago, and no permanent chat logs. When your trip ends, your meetup chats and city presence archive automatically.
                 </p>
               </div>
             </div>
 
             <div className="pt-4 border-t border-[#EAE7E2] flex items-center justify-between text-xs text-[#6B6966]">
-              <span>Trip-window locking keeps feeds 100% current</span>
-              <span className="font-semibold text-[#1A1918]">High Signal · Zero Stale Noise</span>
+              <span>Only travelers currently in the city can browse and join</span>
+              <span className="font-semibold text-[#1A1918]">Active Travelers · Zero Spoilers</span>
             </div>
           </div>
         </div>
@@ -738,23 +745,23 @@ export const LandingView: React.FC = () => {
                 <div className="space-y-4 animate-in fade-in duration-200">
                   <div className="h-44 rounded-2xl bg-[#F9F8F6] border border-[#EAE7E2] p-5 flex flex-col justify-center space-y-2 font-mono-code text-xs">
                     <div className="flex items-center justify-between text-[#6B6966]">
-                      <span>Stripe Authorization:</span>
-                      <span className="font-bold text-[#1A1918]">$10.00 (Escrow Hold)</span>
+                      <span>Refundable Seat Hold:</span>
+                      <span className="font-bold text-[#1A1918]">$10.00 (Temporary)</span>
                     </div>
                     <div className="flex items-center justify-between text-[#059669]">
-                      <span>Host Table QR Check-In:</span>
-                      <span className="font-bold">Scanned at 7:32 PM</span>
+                      <span>Host Table Check-In:</span>
+                      <span className="font-bold">Arrived at 7:32 PM</span>
                     </div>
                     <div className="pt-2 border-t border-[#EAE7E2] flex items-center justify-between font-bold text-sm text-[#059669]">
-                      <span>Billed Amount:</span>
+                      <span>Amount Charged:</span>
                       <span className="bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">$0.00</span>
                     </div>
                   </div>
                   <h3 className="font-editorial text-2xl font-semibold text-[#1A1918]">
-                    Zero Flakes with Temporary Holds
+                    No-Show Protection with Refundable Holds
                   </h3>
                   <p className="text-xs sm:text-sm text-[#6B6966] leading-relaxed">
-                    Seats are held with a temporary $10 pre-authorization. When you meet the host and scan their table QR code, your hold is released to $0 immediately.
+                    Seats are held with a temporary $10 deposit. When you arrive at the meetup and check in with the host, your hold is released immediately ($0 charge).
                   </p>
                 </div>
               )}

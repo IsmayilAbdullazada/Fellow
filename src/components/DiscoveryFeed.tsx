@@ -164,19 +164,19 @@ export const DiscoveryFeed: React.FC = () => {
         </div>
       )}
 
-      {/* Screen 1 Filter Surface: Category Carousel & Date Selector */}
-      <div className="bg-white rounded-2xl border border-[#EAE7E2] p-3.5 sm:p-4 shadow-2xs space-y-3">
-        {/* Date Filter Row + Persistent Female Only Pill */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs no-scrollbar">
+      {/* Unified Filter Surface: Date Selector, Categories & Female-Only Mode */}
+      <div className="bg-white rounded-2xl border border-[#D1CDC7] p-3 sm:p-3.5 shadow-sm space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          {/* Date Quick Filter */}
+          <div className="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar">
             {(['all', 'today', 'tomorrow', 'weekend'] as const).map((filterKey) => (
               <button
                 key={filterKey}
                 onClick={() => setSelectedDateFilter(filterKey)}
-                className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 capitalize text-xs ${
+                className={`min-h-[36px] px-3.5 py-1.5 rounded-full font-bold transition-all shrink-0 capitalize text-xs cursor-pointer ${
                   selectedDateFilter === filterKey
-                    ? 'bg-[#1A1918] text-white'
-                    : 'bg-[#F9F8F6] hover:bg-[#EAE7E2] text-[#6B6966] border border-[#EAE7E2]'
+                    ? 'bg-[#1A1918] text-white shadow-xs'
+                    : 'bg-[#FAF9F6] hover:bg-[#EAE7E2] text-[#4A4744] border border-[#D1CDC7]'
                 }`}
               >
                 {filterKey === 'all' ? 'All Dates' : filterKey === 'weekend' ? 'Weekend' : filterKey}
@@ -184,25 +184,25 @@ export const DiscoveryFeed: React.FC = () => {
             ))}
           </div>
 
-          {/* Rightmost Persistent Pill: 🛡️ Female Only */}
+          {/* Female Only Mode Toggle Button */}
           <div className="shrink-0">
             {currentUser.gender === 'female' ? (
               <button
                 id="filter-female-only-toggle"
                 onClick={() => setFemaleOnlyFilter(!femaleOnlyFilter)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-semibold text-[11px] uppercase tracking-[0.06em] transition-all border ${
+                className={`min-h-[36px] flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all border-2 cursor-pointer ${
                   femaleOnlyFilter
-                    ? 'bg-[#FDF2F4] border-[#FBCFE8] text-[#9D174D] shadow-2xs'
-                    : 'bg-white border-[#EAE7E2] text-[#6B6966] hover:border-[#D1CDC7]'
+                    ? 'bg-[#9D174D] border-[#9D174D] text-white shadow-sm'
+                    : 'bg-white border-[#D1CDC7] text-[#4A4744] hover:border-[#1A1918]'
                 }`}
               >
                 <span className="text-sm">🛡️</span>
-                <span>Female Only</span>
+                <span>Female-Only {femaleOnlyFilter ? 'Active' : ''}</span>
               </button>
             ) : (
               <div
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#F9F8F6] border border-[#EAE7E2] text-[#9C9892] text-[11px] font-medium shrink-0 cursor-not-allowed"
-                title="Female-only plans are restricted to verified female solo travelers"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#FAF9F6] border border-[#D1CDC7] text-[#9C9892] text-xs font-semibold shrink-0 cursor-not-allowed"
+                title="Female-only tables are restricted to verified female solo travelers"
               >
                 <Lock className="w-3 h-3" />
                 <span>Female Only</span>
@@ -211,14 +211,14 @@ export const DiscoveryFeed: React.FC = () => {
           </div>
         </div>
 
-        {/* Category Carousel (Horizontal scrolling, hairline border chips) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar pt-2 border-t border-[#EAE7E2]">
+        {/* Categories Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar pt-2 border-t border-[#EAE7E2]">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+            className={`min-h-[34px] px-3 py-1 rounded-full font-bold transition-all shrink-0 border flex items-center gap-1.5 cursor-pointer ${
               selectedCategory === 'all'
                 ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
-                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+                : 'bg-white hover:bg-[#FAF9F6] text-[#4A4744] border-[#D1CDC7]'
             }`}
           >
             <span>All ({countAll})</span>
@@ -226,46 +226,46 @@ export const DiscoveryFeed: React.FC = () => {
 
           <button
             onClick={() => setSelectedCategory('dining')}
-            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+            className={`min-h-[34px] px-3 py-1 rounded-full font-bold transition-all shrink-0 border flex items-center gap-1.5 cursor-pointer ${
               selectedCategory === 'dining'
                 ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
-                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+                : 'bg-white hover:bg-[#FAF9F6] text-[#4A4744] border-[#D1CDC7]'
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
-            <span>Dinner & Drinks ({countDining})</span>
+            <span>Dining ({countDining})</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory('cafe_cowork')}
-            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+            className={`min-h-[34px] px-3 py-1 rounded-full font-bold transition-all shrink-0 border flex items-center gap-1.5 cursor-pointer ${
               selectedCategory === 'cafe_cowork'
                 ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
-                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+                : 'bg-white hover:bg-[#FAF9F6] text-[#4A4744] border-[#D1CDC7]'
             }`}
           >
             <Coffee className="w-3.5 h-3.5" />
-            <span>Cafe & Co-work ({countCafe})</span>
+            <span>Cowork ({countCafe})</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory('cultural_sight')}
-            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+            className={`min-h-[34px] px-3 py-1 rounded-full font-bold transition-all shrink-0 border flex items-center gap-1.5 cursor-pointer ${
               selectedCategory === 'cultural_sight'
                 ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
-                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+                : 'bg-white hover:bg-[#FAF9F6] text-[#4A4744] border-[#D1CDC7]'
             }`}
           >
             <Landmark className="w-3.5 h-3.5" />
-            <span>Walking & Culture ({countCulture})</span>
+            <span>Culture ({countCulture})</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory('nightlife')}
-            className={`px-3.5 py-1.5 rounded-full font-medium transition-all shrink-0 border flex items-center gap-1.5 ${
+            className={`min-h-[34px] px-3 py-1 rounded-full font-bold transition-all shrink-0 border flex items-center gap-1.5 cursor-pointer ${
               selectedCategory === 'nightlife'
                 ? 'bg-[#E64A2A] text-white border-[#E64A2A]'
-                : 'bg-white hover:bg-[#F9F8F6] text-[#6B6966] border-[#EAE7E2]'
+                : 'bg-white hover:bg-[#FAF9F6] text-[#4A4744] border-[#D1CDC7]'
             }`}
           >
             <Wine className="w-3.5 h-3.5" />
@@ -274,7 +274,30 @@ export const DiscoveryFeed: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Vertical Feed: Micro-Plan Bento Cards (Spec Section 4.1) */}
+      {/* Female-Only Mode Active Banner */}
+      {femaleOnlyFilter && (
+        <div className="bg-[#9D174D] text-white rounded-2xl px-4 py-3 flex items-center justify-between gap-3 shadow-sm animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <span className="text-base">🛡️</span>
+            </div>
+            <div>
+              <p className="text-xs font-bold">Female-Only Mode Active</p>
+              <p className="text-[11px] text-white/90">
+                Filtering for tables hosted exclusively by verified female solo travelers in {city.name}.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setFemaleOnlyFilter(false)}
+            className="text-xs font-bold underline hover:text-white/80 cursor-pointer shrink-0"
+          >
+            Show All
+          </button>
+        </div>
+      )}
+
+      {/* Main Vertical Feed: Micro-Plan Bento Cards with 3-Tier Hierarchy */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
         {filteredPlans.length > 0 ? (
           filteredPlans.map((plan) => {
@@ -283,126 +306,128 @@ export const DiscoveryFeed: React.FC = () => {
             const spotsFilled = planParticipants.length;
             const spotsRemaining = Math.max(0, plan.max_participants - spotsFilled);
 
-            // Generate dot indicators: ● for filled, ○ for open
-            const dots = [];
-            for (let i = 0; i < plan.max_participants; i++) {
-              dots.push(i < spotsFilled ? '●' : '○');
-            }
-
             return (
               <div
                 key={plan.id}
                 id={`micro-plan-card-${plan.id}`}
                 onClick={() => setSelectedPlanId(plan.id)}
-                className="group relative bg-white border border-[#EAE7E2] rounded-2xl overflow-hidden shadow-bento flex flex-col justify-between hover:border-[#1A1918] transition-all duration-200 cursor-pointer text-left active:scale-[0.985]"
+                className="group relative bg-white border-2 border-[#EAE7E2] rounded-3xl overflow-hidden shadow-bento flex flex-col justify-between hover:border-[#1A1918] transition-all duration-200 cursor-pointer text-left active:scale-[0.99]"
               >
                 <div>
-                  {/* Photo Header if available */}
+                  {/* Photo Header (if present) with clean single-badging */}
                   {plan.photo_url && (
-                    <div className="relative h-40 w-full overflow-hidden bg-[#EAE7E2]">
+                    <div className="relative h-44 w-full overflow-hidden bg-[#FAF9F6]">
                       <img
                         src={plan.photo_url}
                         alt={plan.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/95 backdrop-blur-sm text-[#1A1918] shadow-2xs">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+                      
+                      {/* Top Badges (Category + Female Only) */}
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white text-[#1A1918] shadow-sm">
                           {getCategoryLabel(plan.category)}
                         </span>
                         {plan.female_only && (
-                          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#FDF2F4]/95 backdrop-blur-sm border border-[#FBCFE8] text-[#9D174D] shadow-2xs">
-                            ♀ Female Only
+                          <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-[#9D174D] text-white shadow-sm flex items-center gap-1">
+                            <span>🛡️</span>
+                            <span>Female Only</span>
                           </span>
                         )}
                       </div>
-                      <div className="absolute bottom-2.5 right-3">
-                        <span className="bg-[#E64A2A] text-white px-2 py-0.5 rounded-full font-bold text-[11px] shadow-sm">
-                          {spotsRemaining} spot{spotsRemaining > 1 ? 's' : ''} left
+
+                      {/* Bottom Image Overlay: Spots Left */}
+                      <div className="absolute bottom-3 right-3">
+                        <span className="bg-[#1A1918]/90 text-white border border-white/20 px-2.5 py-1 rounded-full font-bold text-xs shadow-sm">
+                          {spotsRemaining} of {plan.max_participants} seats open
                         </span>
                       </div>
                     </div>
                   )}
 
-                  <div className="p-5">
-                    {/* If no photo, show standard category pill row */}
+                  <div className="p-5 sm:p-6 space-y-4">
+                    {/* If no photo, show clean header category & spot line */}
                     {!plan.photo_url && (
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2.5 py-1 rounded-md bg-[#F9F8F6] border border-[#EAE7E2] text-[#1A1918]">
+                      <div className="flex items-center justify-between gap-2 pb-1 border-b border-[#EAE7E2]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#FAF9F6] border border-[#D1CDC7] text-[#1A1918]">
                             {getCategoryLabel(plan.category)}
                           </span>
                           {plan.female_only && (
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2 py-1 rounded-md bg-[#FDF2F4] border border-[#FBCFE8] text-[#9D174D]">
+                            <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#9D174D] text-white">
                               ♀ Female Only
                             </span>
                           )}
                         </div>
-
-                        {/* Spots Left indicator with dots: [Spots Left: 2 of 4] ●●○○ */}
-                        <div className="flex items-center gap-1.5 text-xs text-[#6B6966] font-medium">
-                          <span>Spots: {spotsRemaining} of {plan.max_participants}</span>
-                          <span className="font-mono-code text-sm tracking-tight text-[#E64A2A] font-bold">
-                            {dots.join('')}
-                          </span>
-                        </div>
+                        <span className="text-xs font-bold text-[#E64A2A]">
+                          {spotsRemaining} of {plan.max_participants} seats open
+                        </span>
                       </div>
                     )}
 
-                    {/* Title (Editorial Serif font, 20pt, bold, high contrast) */}
-                    <h3 className="font-editorial text-[20px] leading-[26px] font-semibold text-[#1A1918] mb-3 group-hover:text-[#E64A2A] transition-colors">
-                      {plan.title}
-                    </h3>
-
-                    {/* Bento Box: Venue & Timing Box */}
-                    <div className="bg-[#F9F8F6] border border-[#EAE7E2] rounded-xl p-3 space-y-1.5 text-xs text-[#6B6966]">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5 text-[#1A1918] shrink-0" />
-                        <span className="font-medium text-[#1A1918]">
-                          {formatPlanDateTime(plan.start_time, plan.end_time)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-[#6B6966] shrink-0" />
-                        <span className="truncate text-[#6B6966]">
-                          {plan.venue_name} · {plan.venue_address}
-                        </span>
+                    {/* TIER 1: What & When (Primary Decision-Making Core) */}
+                    <div className="space-y-1.5">
+                      <h3 className="font-editorial text-xl sm:text-2xl leading-snug font-bold text-[#1A1918] group-hover:text-[#E64A2A] transition-colors">
+                        {plan.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs font-bold text-[#1A1918]">
+                        <Calendar className="w-4 h-4 text-[#E64A2A] shrink-0" />
+                        <span>{formatPlanDateTime(plan.start_time, plan.end_time)}</span>
                       </div>
                     </div>
 
-                    {/* Plan excerpt */}
-                    <p className="text-xs text-[#6B6966] leading-relaxed mt-3 line-clamp-2">
-                      {plan.description}
-                    </p>
+                    {/* TIER 2: Single Consolidated Trust Badge */}
+                    <div className="bg-[#FAF9F6] border border-[#D1CDC7] rounded-xl p-2.5 flex items-center justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="relative shrink-0">
+                          <img
+                            src={host?.profile_photo_url}
+                            alt={host?.display_name || 'Host'}
+                            className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-xs"
+                          />
+                          <div
+                            className="absolute -bottom-1 -right-1 bg-[#059669] text-white rounded-full p-0.5 border border-white"
+                            title="Verified Passport ID"
+                          >
+                            <ShieldCheck className="w-2.5 h-2.5 stroke-[3]" />
+                          </div>
+                        </div>
+                        <div className="truncate">
+                          <p className="text-xs font-bold text-[#1A1918] truncate flex items-center gap-1.5">
+                            <span>{host?.display_name}</span>
+                            <span>{host?.origin_flag}</span>
+                            <span className="text-[11px] font-normal text-[#6B6966]">
+                              ({host?.date_of_birth ? calculateAge(host.date_of_birth) : 28})
+                            </span>
+                          </p>
+                          <p className="text-[11px] text-[#059669] font-bold truncate">
+                            {host?.reliability_score}% Reliable · 🛡️ Passport Verified
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#4A4744] bg-white border border-[#D1CDC7] px-2 py-0.5 rounded-full shrink-0">
+                        Host
+                      </span>
+                    </div>
+
+                    {/* TIER 3: Secondary Venue Context & Description */}
+                    <div className="space-y-2 text-xs text-[#4A4744]">
+                      <div className="flex items-center gap-1.5 font-medium truncate">
+                        <MapPin className="w-3.5 h-3.5 text-[#E64A2A] shrink-0" />
+                        <span className="truncate">{plan.venue_name} · {plan.venue_address}</span>
+                      </div>
+                      <p className="leading-relaxed line-clamp-2">
+                        {plan.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Hairline Divider + Host Avatar with Verified Shield */}
-                <div className="mt-4 pt-3.5 hairline-divider flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="relative shrink-0">
-                      <img
-                        src={host?.profile_photo_url}
-                        alt={host?.display_name || 'Host'}
-                        className="w-9 h-9 rounded-full object-cover border border-[#EAE7E2]"
-                      />
-                      {host?.is_verified && (
-                        <div
-                          className="absolute -bottom-0.5 -right-0.5 bg-[#059669] text-white rounded-full p-0.5 border border-white"
-                          title="Verified Passport ID"
-                        >
-                          <ShieldCheck className="w-2.5 h-2.5 stroke-[2.5]" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="truncate">
-                      <p className="text-xs font-semibold text-[#1A1918] truncate">
-                        Hosted by {host?.display_name} ({host?.date_of_birth ? calculateAge(host.date_of_birth) : 28} · {host?.origin_flag})
-                      </p>
-                      <p className="text-[11px] text-[#6B6966] truncate mt-0.5">
-                        Reliability Score: {host?.reliability_score}% · {spotsFilled} joined
-                      </p>
-                    </div>
+                {/* Card Action Footer: High-Trust CTA */}
+                <div className="p-4 sm:p-5 pt-0 flex items-center justify-between gap-3 border-t border-[#EAE7E2] mt-2">
+                  <div className="text-[11px] font-semibold text-[#059669] flex items-center gap-1">
+                    <span>🛡️ $10 hold voided on arrival</span>
                   </div>
 
                   <button
@@ -410,9 +435,9 @@ export const DiscoveryFeed: React.FC = () => {
                       e.stopPropagation();
                       setSelectedPlanId(plan.id);
                     }}
-                    className="shrink-0 px-3.5 py-1.5 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-medium text-xs shadow-2xs active:scale-95 transition-all"
+                    className="shrink-0 px-4 py-2 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-bold text-xs shadow-md shadow-[#E64A2A]/20 active:scale-95 transition-all cursor-pointer"
                   >
-                    View Plan
+                    View Table
                   </button>
                 </div>
               </div>

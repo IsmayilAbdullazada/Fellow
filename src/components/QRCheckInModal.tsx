@@ -26,6 +26,7 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
     currentQrToken,
     qrSecondsRemaining,
     checkInAttendeeWithQr,
+    checkInAttendeeWithLocation,
     currentUser,
     participants,
     allUsers,
@@ -33,6 +34,7 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
   } = useFellow();
 
   const [scanResult, setScanResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [isVerifyingLocation, setIsVerifyingLocation] = useState<boolean>(false);
   const [manualConfirmNotice, setManualConfirmNotice] = useState<string | null>(null);
   const [showReceiptDetails, setShowReceiptDetails] = useState<boolean>(false);
 
@@ -52,11 +54,24 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
     setScanResult(result);
   };
 
+  const handleLocationFallbackCheckIn = () => {
+    setIsVerifyingLocation(true);
+    setTimeout(() => {
+      setIsVerifyingLocation(false);
+      const result = checkInAttendeeWithLocation(plan.id);
+      setScanResult(result);
+    }, 800);
+  };
+
   const handleManualHostCheckIn = (attendeeUserId: string) => {
-    const res = checkInAttendeeWithQr(plan.id, plan.qr_checkin_token);
+    const res = checkInAttendeeWithQr(plan.id, plan.qr_checkin_token, attendeeUserId);
     const targetUser = allUsers.find((u) => u.id === attendeeUserId);
-    setManualConfirmNotice(`Manually verified ${targetUser?.display_name || 'traveler'}. Deposit released.`);
-    setTimeout(() => setManualConfirmNotice(null), 3000);
+    if (res.success) {
+      setManualConfirmNotice(`Checked in ${targetUser?.display_name || 'traveler'}. Seat hold released ($0.00).`);
+    } else {
+      setManualConfirmNotice(res.message);
+    }
+    setTimeout(() => setManualConfirmNotice(null), 3500);
   };
 
   const handleGoToChat = () => {
@@ -78,12 +93,12 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
           <div className="flex items-center gap-2">
             <QrCode className="w-5 h-5 text-[#E64A2A]" />
             <h3 className="font-editorial text-lg font-semibold text-[#1A1918]">
-              {mode === 'host_present' ? 'Host Attendance HUD' : 'In-Person Attendance Check-In'}
+              {mode === 'host_present' ? 'Host Table Check-In' : 'Table Check-In'}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-[#9C9892] hover:text-[#1A1918] rounded-full transition-colors"
+            className="p-1.5 text-[#9C9892] hover:text-[#1A1918] rounded-full transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -148,9 +163,9 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
               </div>
 
               <div className="pt-2 text-xs text-[#6B6966] space-y-1">
-                <p className="font-semibold text-[#1A1918]">Display this screen to your attendees</p>
+                <p className="font-semibold text-[#1A1918]">Show this code to your attendees</p>
                 <p className="text-[11px] leading-relaxed">
-                  Rotating cryptographic token prevents remote screenshot fraud. Once scanned, guest $10 deposits are automatically voided.
+                  The code refreshes automatically for security. Once your guests scan it, their $10 seat holds are released immediately ($0 charge).
                 </p>
               </div>
 
@@ -166,7 +181,7 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
                   <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#9C9892]">
                     Attendee Roster
                   </span>
-                  <span className="text-[10px] text-[#9C9892]">Tap row if camera fails</span>
+                  <span className="text-[10px] text-[#9C9892]">Tap button if camera unavailable</span>
                 </div>
 
                 <div className="space-y-1.5">
@@ -204,16 +219,16 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
                         ) : isCheckedIn ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#059669] text-[10px] font-semibold">
                             <CheckCircle className="w-3 h-3" />
-                            <span>CHECKED IN · $0 VOIDED</span>
+                            <span>CHECKED IN · $0 CHARGED</span>
                           </span>
                         ) : (
                           <button
                             onClick={() => user && handleManualHostCheckIn(user.id)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFFBEB] hover:bg-[#FEF3C7] border border-[#FDE68A] text-[#D97706] text-[10px] font-semibold transition-colors"
-                            title="Manual backup confirmation"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFFBEB] hover:bg-[#FEF3C7] border border-[#FDE68A] text-[#D97706] text-[10px] font-semibold transition-colors cursor-pointer"
+                            title="Manual check-in"
                           >
                             <UserCheck className="w-3 h-3" />
-                            <span>Manual Confirm</span>
+                            <span>Check In Guest</span>
                           </button>
                         )}
                       </div>
@@ -228,36 +243,53 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
               <div>
                 <h4 className="font-editorial text-xl font-semibold text-[#1A1918]">Scan Host QR Code</h4>
                 <p className="text-xs text-[#6B6966] mt-0.5">
-                  Point camera at the host's screen at {plan.venue_name}
+                  Point your camera at the host's screen at {plan.venue_name}
                 </p>
               </div>
 
               {isAlreadyCheckedIn || scanResult?.success ? (
-                /* Screen 4 Success Sheet (Tactile high-trust confirmation) */
-                <div className="bg-[#ECFDF5] border border-[#A7F3D0] rounded-2xl p-6 text-center space-y-3.5 animate-in zoom-in-95">
-                  <div className="w-14 h-14 rounded-full bg-[#059669] text-white flex items-center justify-center mx-auto shadow-sm">
-                    <CheckCircle className="w-8 h-8 stroke-[2.5]" />
-                  </div>
-                  <div>
-                    <h4 className="font-editorial text-2xl font-semibold text-[#1A1918]">
-                      Checked In.
-                    </h4>
-                    <p className="text-xs text-[#065F46] mt-1.5 leading-relaxed font-medium">
-                      Your $10 deposit authorization has been cancelled. Total cost: $0. Reliability score maintained at 100%.
+                /* Success Sheet */
+                <div className="bg-[#FAF9F6] border-2 border-[#059669] rounded-3xl p-6 sm:p-7 text-center space-y-5 animate-in zoom-in-95 shadow-lg">
+                  {/* Hero Attendance Confirmed */}
+                  <div className="bg-white border-2 border-[#A7F3D0] rounded-2xl p-5 shadow-sm space-y-2">
+                    <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-[#059669]">
+                      <CheckCircle className="w-4 h-4 stroke-[2.5]" />
+                      <span>In-Person Attendance Confirmed</span>
+                    </div>
+
+                    {/* The Hero $10 -> $0 Transition */}
+                    <div className="flex items-center justify-center gap-3 py-1">
+                      <del className="text-2xl sm:text-3xl font-mono-code font-bold text-[#9C9892] decoration-[#DC2626] decoration-2">
+                        $10.00
+                      </del>
+                      <ArrowRight className="w-5 h-5 text-[#059669] stroke-[2.5]" />
+                      <span className="text-4xl sm:text-5xl font-mono-code font-black text-[#059669] tracking-tight">
+                        $0.00
+                      </span>
+                    </div>
+
+                    <div className="inline-block px-3 py-1 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#047857] text-xs font-bold font-mono-code">
+                      SEAT HOLD RELEASED · $0 CHARGED
+                    </div>
+
+                    <p className="text-xs text-[#4A4744] pt-1">
+                      Your temporary $10 seat hold has been released. You were charged $0.00.
                     </p>
                   </div>
 
-                  <div className="bg-white/90 border border-[#A7F3D0] rounded-2xl p-3.5 text-xs text-[#065F46] space-y-2 text-left">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#A7F3D0]/60">
-                      <span className="font-medium text-[#1A1918]">Attendance Status</span>
-                      <span className="font-semibold text-[#059669] flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#059669] inline-block" />
-                        Verified In Person
-                      </span>
+                  {/* Verification & Receipt Details */}
+                  <div className="bg-white rounded-2xl border border-[#EAE7E2] p-4 text-xs space-y-2.5 text-left">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#EAE7E2]">
+                      <span className="text-[#6B6966]">Host Check-In Screen</span>
+                      <span className="font-semibold text-[#1A1918]">{plan.venue_name}</span>
+                    </div>
+                    <div className="flex items-center justify-between pb-2 border-b border-[#EAE7E2]">
+                      <span className="text-[#6B6966]">Table Location</span>
+                      <span className="font-semibold text-[#1A1918]">{plan.city_code === 'TYO_JP' ? 'Tokyo Hub' : 'Lisbon Hub'}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-[#1A1918]">$10 Anti-Flake Deposit</span>
-                      <span className="font-semibold text-[#059669]">Voided ($0 charged)</span>
+                      <span className="text-[#6B6966]">Check-In Status</span>
+                      <span className="font-mono-code font-bold text-[#059669]">✓ VERIFIED IN PERSON</span>
                     </div>
                   </div>
 
@@ -265,64 +297,83 @@ export const QRCheckInModal: React.FC<QRCheckInModalProps> = ({ plan, mode, onCl
                     <button
                       type="button"
                       onClick={() => setShowReceiptDetails(!showReceiptDetails)}
-                      className="text-[11px] text-[#065F46]/80 hover:text-[#065F46] underline font-medium"
+                      className="text-xs text-[#059669] hover:underline font-semibold cursor-pointer"
                     >
-                      {showReceiptDetails ? 'Hide cryptographic receipt' : 'Show verification details'}
+                      {showReceiptDetails ? 'Hide check-in receipt' : 'Show check-in receipt'}
                     </button>
                     {showReceiptDetails && (
-                      <div className="mt-2 bg-white/70 border border-[#A7F3D0] rounded-xl p-2.5 text-[11px] font-mono-code text-[#065F46] text-left space-y-0.5">
+                      <div className="mt-2 bg-[#F9F8F6] border border-[#D1CDC7] rounded-xl p-3 text-[11px] font-mono-code text-[#4A4744] text-left space-y-1">
                         <p>REF: FLW-AUTH-{plan.id.slice(-4).toUpperCase()}</p>
-                        <p>HASH: SHA256-IN-PERSON-VERIFIED</p>
-                        <p>TIME: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p>TIMESTAMP: {new Date().toLocaleTimeString()} (Confirmed)</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="pt-2 flex flex-col gap-2">
+                  <div className="pt-2 flex flex-col gap-2.5">
                     <button
                       onClick={handleGoToChat}
-                      className="w-full py-3 px-4 rounded-full bg-[#059669] hover:bg-[#047857] text-white font-semibold text-xs shadow-sm transition-all"
+                      className="w-full py-3.5 px-4 rounded-full bg-[#1A1918] hover:bg-[#2E2C29] text-white font-bold text-xs shadow-md transition-all cursor-pointer"
                     >
-                      Open Ephemeral Plan Chat
+                      Open Meetup Group Chat
                     </button>
                     <button
                       onClick={onClose}
-                      className="w-full py-2 px-4 rounded-full bg-white text-[#1A1918] border border-[#EAE7E2] font-semibold text-xs transition-all"
+                      className="w-full py-2.5 px-4 rounded-full bg-white text-[#4A4744] hover:text-[#1A1918] border border-[#D1CDC7] font-semibold text-xs transition-all cursor-pointer"
                     >
-                      Close HUD
+                      Close Window
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Optical Viewfinder Mockup */}
-                  <div className="relative w-56 h-56 mx-auto rounded-2xl border-2 border-[#EAE7E2] bg-[#1A1918] overflow-hidden flex items-center justify-center shadow-inner">
-                    {/* Viewfinder corner brackets */}
-                    <div className="absolute top-2.5 left-2.5 w-6 h-6 border-t-2 border-l-2 border-white/80" />
-                    <div className="absolute top-2.5 right-2.5 w-6 h-6 border-t-2 border-r-2 border-white/80" />
-                    <div className="absolute bottom-2.5 left-2.5 w-6 h-6 border-b-2 border-l-2 border-white/80" />
-                    <div className="absolute bottom-2.5 right-2.5 w-6 h-6 border-b-2 border-r-2 border-white/80" />
+                  {/* Optical Viewfinder */}
+                  <div className="relative w-64 h-64 mx-auto rounded-3xl border-4 border-[#1A1918] bg-[#1A1918] overflow-hidden flex items-center justify-center shadow-xl p-3">
+                    {/* Interior High Contrast Target Box */}
+                    <div className="relative w-full h-full rounded-2xl border-2 border-dashed border-white/60 flex items-center justify-center">
+                      {/* Bold Solid Corner Brackets */}
+                      <div className="absolute top-2 left-2 w-8 h-8 border-t-4 border-l-4 border-white" />
+                      <div className="absolute top-2 right-2 w-8 h-8 border-t-4 border-r-4 border-white" />
+                      <div className="absolute bottom-2 left-2 w-8 h-8 border-b-4 border-l-4 border-white" />
+                      <div className="absolute bottom-2 right-2 w-8 h-8 border-b-4 border-r-4 border-white" />
 
-                    {/* Animated laser line */}
-                    <div className="absolute left-6 right-6 h-0.5 bg-[#E64A2A] shadow-[0_0_8px_#E64A2A] animate-bounce duration-1000" />
+                      {/* Animated Scanning Line */}
+                      <div className="absolute left-4 right-4 h-1 bg-[#E64A2A] shadow-[0_0_12px_#E64A2A] animate-pulse" />
 
-                    <div className="text-center p-4">
-                      <Camera className="w-8 h-8 text-[#9C9892] mx-auto mb-2" />
-                      <p className="text-[11px] text-[#D1CDC7] font-medium">Align with Host QR</p>
+                      <div className="text-center p-4">
+                        <Camera className="w-10 h-10 text-white/80 mx-auto mb-2" />
+                        <p className="text-xs text-white font-bold">Lock onto Host Screen</p>
+                        <p className="text-[10px] text-white/70 mt-0.5">Ready to scan QR</p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* One-Tap Simulation Button */}
+                  {/* One-Tap Scan Button */}
                   <button
                     id="btn-scan-host-qr-simulate"
                     onClick={handleSimulatedScan}
-                    className="w-full py-3.5 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-[#E64A2A]/20 active:scale-[0.99] transition-all"
+                    className="w-full py-4 px-4 rounded-full bg-[#E64A2A] hover:bg-[#D43F20] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#E64A2A]/25 active:scale-[0.99] transition-all cursor-pointer"
                   >
-                    <QrCode className="w-4 h-4 stroke-[2.5]" />
+                    <QrCode className="w-5 h-5 stroke-[2.5]" />
                     <span>Scan Host QR Code to Check In</span>
                   </button>
-                  <p className="text-[11px] text-[#9C9892]">
-                    Hold phone up to host's screen at the venue table
+
+                  {/* Fallback Option if host phone is delayed/dead */}
+                  <div className="pt-2 border-t border-[#EAE7E2] space-y-2">
+                    <p className="text-[11px] text-[#6B6966]">
+                      Host delayed or phone battery died? Protect your hold with venue verification:
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleLocationFallbackCheckIn}
+                      disabled={isVerifyingLocation}
+                      className="w-full py-2.5 px-3 rounded-xl border border-[#D1CDC7] bg-[#F9F8F6] hover:bg-white hover:border-[#1A1918] text-[#1A1918] text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                      <span>{isVerifyingLocation ? 'Verifying Venue Location...' : `Check In at ${plan.venue_name} (GPS Proximity)`}</span>
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-[#4A4744]">
+                    Hold phone up to host's screen at the venue table to confirm your arrival
                   </p>
                 </div>
               )}

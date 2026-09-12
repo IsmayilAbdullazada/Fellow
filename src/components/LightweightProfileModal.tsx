@@ -48,7 +48,7 @@ export const LightweightProfileModal: React.FC<LightweightProfileModalProps> = (
             {user.is_verified && (
               <div
                 className="absolute -bottom-1 -right-1 bg-[#059669] text-white rounded-full p-1 border-2 border-white shadow-xs"
-                title="Government ID & Biometric Verified"
+                title="Verified Government ID"
               >
                 <ShieldCheck className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
@@ -70,7 +70,7 @@ export const LightweightProfileModal: React.FC<LightweightProfileModalProps> = (
           {user.is_verified ? (
             <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#059669] text-[11px] font-semibold tracking-wide">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>PASSPORT KYC VERIFIED</span>
+              <span>GOVERNMENT ID VERIFIED</span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#FFFBEB] border border-[#FDE68A] text-[#D97706] text-[11px] font-semibold">

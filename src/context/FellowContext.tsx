@@ -10,8 +10,25 @@ import {
   CityCode,
   SafetyReport,
   SafetyReportType,
+  UserGender,
   WaitlistRegion,
 } from '../types';
+
+export interface RegisterUserData {
+  fullName: string;
+  displayName: string;
+  gender: UserGender;
+  originCountry: string;
+  originFlag: string;
+  nativeLanguage?: string;
+  bio?: string;
+  phoneNumber?: string;
+  email?: string;
+  profilePhotoUrl?: string;
+  cityCode: CityCode;
+  arrivalDate: string;
+  departureDate: string;
+}
 import {
   CITY_HUBS,
   WAITLIST_CITIES,
@@ -62,10 +79,14 @@ interface FellowContextType {
   isVerificationModalOpen: boolean;
   setIsVerificationModalOpen: (open: boolean) => void;
 
-  // Dynamic QR Check-in
+  // Dynamic QR & Venue Proximity Check-in
   currentQrToken: string;
   qrSecondsRemaining: number;
   checkInAttendeeWithQr: (planId: string, scannedToken: string, attendeeUserId?: string) => { success: boolean; message: string };
+  checkInAttendeeWithLocation: (planId: string, attendeeUserId?: string) => { success: boolean; message: string };
+
+  // Registration & Onboarding
+  registerUser: (data: RegisterUserData) => User;
 
   // Chat
   chatRooms: ChatRoom[];
@@ -94,6 +115,8 @@ interface FellowContextType {
   setPendingAction: (action: { type: 'join_plan' | 'host_plan' | 'view_chat' | 'profile'; planId?: string } | null) => void;
   activeTab: 'landing' | 'discover' | 'my_plans' | 'profile';
   setActiveTab: (tab: 'landing' | 'discover' | 'my_plans' | 'profile') => void;
+  myPlansSubTab: 'attending' | 'hosting';
+  setMyPlansSubTab: (tab: 'attending' | 'hosting') => void;
   selectedPlanId: string | null;
   setSelectedPlanId: (id: string | null) => void;
   activeChatPlanId: string | null;
@@ -181,6 +204,7 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const session = localStorage.getItem('fellow_auth_session_v2');
     return session === 'true' ? 'discover' : 'landing';
   });
+  const [myPlansSubTab, setMyPlansSubTab] = useState<'attending' | 'hosting'>('attending');
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [activeChatPlanId, setActiveChatPlanId] = useState<string | null>(null);
   const [isHostModalOpen, setIsHostModalOpen] = useState<boolean>(false);
@@ -327,6 +351,9 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
     setIsAuthenticated(true);
     localStorage.setItem('fellow_auth_session_v2', 'true');
+    if (activeTab === 'landing') {
+      setActiveTab('discover');
+    }
     confetti({
       particleCount: 50,
       spread: 60,
@@ -338,6 +365,69 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setIsAuthenticated(false);
     localStorage.removeItem('fellow_auth_session_v2');
     setActiveTab('landing');
+  };
+
+  // Register New User & Trip
+  const registerUser = (data: RegisterUserData): User => {
+    const newId = `user_${Date.now()}`;
+    const newUser: User = {
+      id: newId,
+      full_name: data.fullName,
+      display_name: data.displayName,
+      gender: data.gender,
+      email: data.email || `${data.displayName.toLowerCase().replace(/[^a-z0-9]/g, '')}@fellowtraveler.io`,
+      phone_number: data.phoneNumber || '+1 555-019-8822',
+      date_of_birth: '1996-05-14',
+      bio: data.bio || 'Solo traveler eager to explore local food markets, hidden cafes, and walking streets.',
+      profile_photo_url:
+        data.profilePhotoUrl ||
+        (data.gender === 'female'
+          ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80'
+          : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=80'),
+      is_verified: false,
+      verified_at: null,
+      verification_provider_ref: null,
+      has_paid_pass: false,
+      reliability_score: 100,
+      origin_country: data.originCountry,
+      origin_flag: data.originFlag,
+      native_language: data.nativeLanguage || 'English',
+      code_of_conduct_signed: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Add user to state
+    setUsers((prev) => [newUser, ...prev]);
+    setCurrentUserId(newId);
+
+    // Create travel window trip
+    const newTrip: Trip = {
+      id: `trip_${newId}_${data.cityCode}_${Date.now()}`,
+      user_id: newId,
+      city_code: data.cityCode,
+      arrival_date: data.arrivalDate,
+      departure_date: data.departureDate,
+      status: 'active',
+      created_at: new Date().toISOString(),
+    };
+    setTrips((prev) => [newTrip, ...prev]);
+    setActiveCityCodeState(data.cityCode);
+
+    // Authenticate session
+    setIsAuthenticated(true);
+    localStorage.setItem('fellow_auth_session_v2', 'true');
+
+    // Chained Onboarding: Prompt Community Agreement immediately
+    setIsCodeOfConductOpen(true);
+
+    confetti({
+      particleCount: 70,
+      spread: 60,
+      origin: { y: 0.6 },
+    });
+
+    return newUser;
   };
 
   // Waitlist
@@ -477,6 +567,7 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setPlans((prev) => [newPlan, ...prev]);
     setParticipants((prev) => [...prev, hostParticipant]);
     setChatRooms((prev) => [...prev, newChatRoom]);
+    setMyPlansSubTab('hosting');
 
     confetti({
       particleCount: 50,
@@ -675,6 +766,46 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   };
 
+  // Alternative Venue Proximity Check-In (Protects guests if host phone dies or host is delayed)
+  const checkInAttendeeWithLocation = (planId: string, attendeeUserId?: string) => {
+    const targetUid = attendeeUserId || currentUserId;
+    const participant = participants.find(
+      (p) => p.plan_id === planId && p.user_id === targetUid
+    );
+
+    if (!participant) {
+      return { success: false, message: 'Attendee record not found for this micro-plan.' };
+    }
+
+    if (participant.checked_in_at) {
+      return { success: true, message: 'Attendee has already checked in! Seat hold was previously released.' };
+    }
+
+    // Mark checked in and release deposit
+    setParticipants((prev) =>
+      prev.map((part) =>
+        part.id === participant.id
+          ? {
+              ...part,
+              checked_in_at: new Date().toISOString(),
+              deposit_status: 'released',
+            }
+          : part
+      )
+    );
+
+    confetti({
+      particleCount: 80,
+      spread: 60,
+      origin: { y: 0.6 },
+    });
+
+    return {
+      success: true,
+      message: 'Venue proximity verified! Your $10 seat hold has been released ($0 cost).',
+    };
+  };
+
   // Chat message send
   const sendChatMessage = (planId: string, content: string) => {
     if (!content.trim()) return { success: false, error: 'Message cannot be empty.' };
@@ -779,6 +910,8 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         currentQrToken,
         qrSecondsRemaining,
         checkInAttendeeWithQr,
+        checkInAttendeeWithLocation,
+        registerUser,
         chatRooms,
         chatMessages,
         sendChatMessage,
@@ -796,6 +929,8 @@ export const FellowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setPendingAction,
         activeTab,
         setActiveTab,
+        myPlansSubTab,
+        setMyPlansSubTab,
         selectedPlanId,
         setSelectedPlanId,
         activeChatPlanId,

@@ -123,24 +123,26 @@ export const Navigation: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Persona Fast Switcher (for test review) */}
-                  <div className="relative group">
-                    <select
-                      id="persona-switcher-select"
-                      value={currentUser.id}
-                      onChange={(e) => setCurrentUserById(e.target.value)}
-                      className="text-xs bg-white text-[#1A1918] rounded-full pl-3 pr-7 py-1.5 border border-[#EAE7E2] hover:border-[#D1CDC7] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E64A2A] appearance-none font-medium shadow-2xs"
-                    >
-                      {allUsers.map((u) => (
-                        <option key={u.id} value={u.id} className="text-[#1A1918] bg-white font-medium">
-                          {u.display_name} ({u.gender === 'female' ? '♀' : '♂'}{u.is_verified ? ' · KYC' : ' · Unverified'})
-                        </option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9C9892]">
-                      <ChevronDown className="w-3.5 h-3.5" />
+                  {/* Dev Mode Only: Persona Fast Switcher */}
+                  {typeof window !== 'undefined' && (window.location.search.includes('dev=true') || localStorage.getItem('fellow_dev_mode') === 'true') && (
+                    <div className="relative group">
+                      <select
+                        id="persona-switcher-select"
+                        value={currentUser.id}
+                        onChange={(e) => setCurrentUserById(e.target.value)}
+                        className="text-xs bg-white text-[#1A1918] rounded-full pl-3 pr-7 py-1.5 border border-[#EAE7E2] hover:border-[#D1CDC7] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#E64A2A] appearance-none font-medium shadow-2xs"
+                      >
+                        {allUsers.map((u) => (
+                          <option key={u.id} value={u.id} className="text-[#1A1918] bg-white font-medium">
+                            {u.display_name} ({u.gender === 'female' ? '♀' : '♂'}{u.is_verified ? ' · Verified' : ' · Unverified'})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9C9892]">
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Verified Avatar / Profile */}
                   <div className="relative">
